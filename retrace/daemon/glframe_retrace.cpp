@@ -136,7 +136,7 @@ FrameRetrace::openFile(const std::string &filename,
     delete call;
     if (frame_boundary) {
       ++current_frame;
-      callback->onFileOpening(false, false, current_frame * 100 / framenumber);
+      callback->onFileOpening(false, false, current_frame);
       if (current_frame == framenumber)
         break;
     }
@@ -174,7 +174,7 @@ FrameRetrace::openFile(const std::string &filename,
 
   // record the final render as ending a render target region
   render_target_regions.push_back(RenderId(m_renders.size() - 1));
-  callback->onFileOpening(false, true, 100);
+  callback->onFileOpening(false, true, current_frame);
 }
 
 int
