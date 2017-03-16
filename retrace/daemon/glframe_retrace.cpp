@@ -312,7 +312,7 @@ FrameState::FrameState(const std::string &filename,
   }
 
   while ((call = parser.scan_call())) {
-    if (call->flags & trace::CALL_FLAG_RENDER) {
+    if (RetraceRender::isRender(*call)) {
       ++render_count;
     }
 

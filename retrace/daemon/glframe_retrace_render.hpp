@@ -75,6 +75,7 @@ class RetraceRender {
   void onApi(SelectionId selId,
              RenderId renderId,
              OnFrameRetrace *callback);
+  static bool isRender(const trace::Call &c);
 
  private:
   trace::Parser *m_parser;
