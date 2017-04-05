@@ -65,3 +65,5 @@ target_link_libraries(frame_retrace
 install (TARGETS frame_retrace RUNTIME DESTINATION bin) 
 
 Lint(UI_SRC)
+
+add_subdirectory(new-gui)
