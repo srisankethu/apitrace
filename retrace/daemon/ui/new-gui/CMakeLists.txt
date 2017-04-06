@@ -36,9 +36,18 @@ add_definitions(${Qt5Widgets_DEFINITIONS})
 
 qt5_add_resources(RESOURCE_ADDED_NG resources.qrc)
 
-add_executable(fr-new-gui
+set (UI_HDRS
+  mainwindow.hpp
+)
+
+set (UI_SRC
   main.cpp
-  ${UIS_HDRS}
+  mainwindow.cpp
+)
+
+add_executable(fr-new-gui
+  ${UI_SRC}
+  ${UI_HDRS}
   ${RESOURCE_ADDED_NG}
 )
 
