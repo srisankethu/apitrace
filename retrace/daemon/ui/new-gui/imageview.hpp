@@ -25,36 +25,30 @@
  *   Laura Ekstrand <laura@jlekstrand.net>
  **************************************************************************/
 
-#include "mainwindow.hpp"
 
-#include <QGuiApplication>
-#include <QRect>
-#include <QScreen>
-#include <QStatusBar>
+#ifndef _IMAGEVIEW_HPP_
+#define _IMAGEVIEW_HPP_
 
-using glretrace::MainWindow;
-using glretrace::OpenDialog;
+#include <QLabel>
+#include <QPixmap>
+#include <QResizeEvent>
+#include <QWidget>
 
-MainWindow::MainWindow() {
-  // Create a placeholder widget
-  centralWidget = new QWidget(this);
-  layout = new QVBoxLayout(centralWidget);
-  centralWidget->setLayout(layout);
-  setCentralWidget(centralWidget);
+namespace glretrace {
 
+class ImageView : public QLabel {
+  Q_OBJECT
+ public:
+  explicit ImageView(QWidget *parent = 0);
+  virtual ~ImageView();
 
-  // Window finalization.
-  QRect screenGeometry = QGuiApplication::primaryScreen()->geometry();
-  screenGeometry.moveTo(0, 0);
-  setGeometry(screenGeometry);
-  setWindowTitle("Frame Retrace");
-  statusBar()->showMessage("Ready");
+  void setImage(QPixmap p);
+  void resizeEvent(QResizeEvent *event);
 
-  // Create the dialog.
-  dialog = new OpenDialog(this);
-  show();
-  dialog->exec();
-}
+ protected:
+  QPixmap pixmap;
+};
 
-MainWindow::~MainWindow() {
-}
+}  // namespace glretrace
+
+#endif  // _IMAGEVIEW_HPP_

@@ -35,7 +35,6 @@ int main(int argc, char *argv[]) {
   QApplication app(argc, argv);
 
   MainWindow mwindow;
-  mwindow.show();
 
   int ret = app.exec();
   return ret;

@@ -25,36 +25,53 @@
  *   Laura Ekstrand <laura@jlekstrand.net>
  **************************************************************************/
 
-#include "mainwindow.hpp"
 
-#include <QGuiApplication>
-#include <QRect>
-#include <QScreen>
-#include <QStatusBar>
+#ifndef _OPENDIALOG_HPP_
+#define _OPENDIALOG_HPP_
 
-using glretrace::MainWindow;
-using glretrace::OpenDialog;
+#include <QCompleter>
+#include <QDialog>
+#include <QDialogButtonBox>
+#include <QFileSystemModel>
+#include <QGridLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QSpinBox>
+#include <QToolButton>
+#include <QVBoxLayout>
+#include <QWidget>
 
-MainWindow::MainWindow() {
-  // Create a placeholder widget
-  centralWidget = new QWidget(this);
-  layout = new QVBoxLayout(centralWidget);
-  centralWidget->setLayout(layout);
-  setCentralWidget(centralWidget);
+#include "imageview.hpp"
 
+namespace glretrace {
 
-  // Window finalization.
-  QRect screenGeometry = QGuiApplication::primaryScreen()->geometry();
-  screenGeometry.moveTo(0, 0);
-  setGeometry(screenGeometry);
-  setWindowTitle("Frame Retrace");
-  statusBar()->showMessage("Ready");
+class OpenDialog : public QDialog {
+  Q_OBJECT
+ public:
+  explicit OpenDialog(QWidget *parent = 0);
+  virtual ~OpenDialog();
 
-  // Create the dialog.
-  dialog = new OpenDialog(this);
-  show();
-  dialog->exec();
-}
+ public slots:
+  void getFilename();
+  void openFile();
 
-MainWindow::~MainWindow() {
-}
+ protected:
+  QVBoxLayout *layout;
+  ImageView *view;
+  QWidget *controls;
+  QGridLayout *controlsLayout;
+  QLabel *fileLabel;
+  QLineEdit *lineEdit;
+  QCompleter *lineEditCompleter;
+  QFileSystemModel *lineEditModel;
+  QToolButton *fileButton;
+  QLabel *frameLabel;
+  QSpinBox *frameBox;
+  QLabel *hostLabel;
+  QLineEdit *hostEdit;
+  QDialogButtonBox *dialogButtons;
+};
+
+}  // namespace glretrace
+
+#endif  // _OPENDIALOG_HPP_

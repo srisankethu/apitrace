@@ -28,5 +28,6 @@
 <RCC>
     <qresource prefix="/">
         <file>images/fr.png</file>
+        <file>images/document-open.png</file>
     </qresource>
 </RCC>

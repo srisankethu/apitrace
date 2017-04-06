@@ -33,6 +33,8 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
+#include "opendialog.hpp"
+
 namespace glretrace {
 
 class MainWindow : public QMainWindow {
@@ -44,6 +46,7 @@ class MainWindow : public QMainWindow {
  protected:
   QWidget *centralWidget;
   QVBoxLayout *layout;
+  OpenDialog *dialog;
 };
 
 }  // namespace glretrace

@@ -25,36 +25,35 @@
  *   Laura Ekstrand <laura@jlekstrand.net>
  **************************************************************************/
 
-#include "mainwindow.hpp"
+#include "imageview.hpp"
 
-#include <QGuiApplication>
-#include <QRect>
-#include <QScreen>
-#include <QStatusBar>
+#include <QSizePolicy>
 
-using glretrace::MainWindow;
-using glretrace::OpenDialog;
+using glretrace::ImageView;
 
-MainWindow::MainWindow() {
-  // Create a placeholder widget
-  centralWidget = new QWidget(this);
-  layout = new QVBoxLayout(centralWidget);
-  centralWidget->setLayout(layout);
-  setCentralWidget(centralWidget);
-
-
-  // Window finalization.
-  QRect screenGeometry = QGuiApplication::primaryScreen()->geometry();
-  screenGeometry.moveTo(0, 0);
-  setGeometry(screenGeometry);
-  setWindowTitle("Frame Retrace");
-  statusBar()->showMessage("Ready");
-
-  // Create the dialog.
-  dialog = new OpenDialog(this);
-  show();
-  dialog->exec();
+ImageView::ImageView(QWidget *parent) : QLabel(parent) {
+  setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  setAlignment(Qt::AlignCenter);
 }
 
-MainWindow::~MainWindow() {
+ImageView::~ImageView() {
+}
+
+void
+ImageView::setImage(QPixmap p) {
+  if (p.isNull())
+    return;
+
+  pixmap = p;
+  setPixmap(pixmap.scaled(size(), Qt::KeepAspectRatio,
+                                  Qt::SmoothTransformation));
+}
+
+void
+ImageView::resizeEvent(QResizeEvent *event) {
+  if (pixmap.isNull())
+    return;
+
+  setPixmap(pixmap.scaled(size(), Qt::KeepAspectRatio,
+                                  Qt::SmoothTransformation));
 }
