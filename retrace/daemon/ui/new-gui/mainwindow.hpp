@@ -29,7 +29,14 @@
 #ifndef _MAINWINDOW_HPP_
 #define _MAINWINDOW_HPP_
 
+#include <QAction>
+#include <QComboBox>
+#include <QHBoxLayout>
 #include <QMainWindow>
+#include <QLabel>
+#include <QLineEdit>
+#include <QStringList>
+#include <QTabWidget>
 #include <QVBoxLayout>
 #include <QWidget>
 
@@ -47,6 +54,16 @@ class MainWindow : public QMainWindow {
   QWidget *centralWidget;
   QVBoxLayout *layout;
   OpenDialog *dialog;
+  QWidget *metricsBar;
+  QHBoxLayout *metricsBarLayout;
+  QLabel *ylabel;
+  QLabel *xlabel;
+  QStringList metrics;
+  QComboBox *yComboBox;
+  QComboBox *xComboBox;
+  QLabel *filterLabel;
+  QLineEdit *filter;
+  QTabWidget *tabs;
 };
 
 }  // namespace glretrace
