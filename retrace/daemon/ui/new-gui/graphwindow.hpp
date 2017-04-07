@@ -26,49 +26,37 @@
  **************************************************************************/
 
 
-#ifndef _MAINWINDOW_HPP_
-#define _MAINWINDOW_HPP_
+#ifndef _GRAPHWINDOW_HPP_
+#define _GRAPHWINDOW_HPP_
 
-#include <QAction>
-#include <QComboBox>
-#include <QHBoxLayout>
-#include <QMainWindow>
-#include <QLabel>
-#include <QLineEdit>
-#include <QStringList>
-#include <QTabWidget>
-#include <QVBoxLayout>
-#include <QWidget>
+#include <QOpenGLWindow>
+#include <QWindow>
 
-#include "opendialog.hpp"
-#include "graphwindow.hpp"
+#include "glframe_bargraph.hpp"
 
 namespace glretrace {
 
-class MainWindow : public QMainWindow {
+class GraphWindow : public QOpenGLWindow {
   Q_OBJECT
  public:
-  MainWindow();
-  ~MainWindow();
+  // UpdateBehavior options:
+  // NoPartialUpdate (0):  this class paints whole window.
+  // PartialUpdateBlit (1): class paints only some of window with blit
+  // PartialUpdateBlend (2): only some of window, but alpha blend
+  // rather than blit
+  // http://doc.qt.io/qt-5/qopenglwindow.html#UpdateBehavior-enum
+  explicit GraphWindow(UpdateBehavior updateBehavior = NoPartialUpdate,
+                       QWindow *parent = 0);
+  virtual ~GraphWindow();
+
+  void initializeGL();
+  void paintGL();
+  void resizeGL(int w, int h);
 
  protected:
-  QWidget *centralWidget;
-  QVBoxLayout *layout;
-  OpenDialog *dialog;
-  GraphWindow *graph;
-  QWidget *graphContainer;
-  QWidget *metricsBar;
-  QHBoxLayout *metricsBarLayout;
-  QLabel *ylabel;
-  QLabel *xlabel;
-  QStringList metrics;
-  QComboBox *yComboBox;
-  QComboBox *xComboBox;
-  QLabel *filterLabel;
-  QLineEdit *filter;
-  QTabWidget *tabs;
+  BarGraphRenderer *renderer;
 };
 
 }  // namespace glretrace
 
-#endif  // _MAINWINDOW_HPP_
+#endif  // _GRAPHWINDOW_HPP_

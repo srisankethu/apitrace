@@ -100,6 +100,8 @@ BarGraphRenderer::fshader =
 BarGraphRenderer::BarGraphRenderer(bool invert)
     : mouse_vertices(4),
       mouse_area(2),
+      max_y(1.0),
+      total_x(3.0),
       invert_y(invert ? -1 : 1),
       zoom(1.0),
       zoom_translate(0.0),
