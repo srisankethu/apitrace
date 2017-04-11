@@ -28,13 +28,16 @@
 #include <QApplication>
 
 #include "mainwindow.hpp"
+#include "uimodel.hpp"
 
 using glretrace::MainWindow;
+using glretrace::UiModel;
 
 int main(int argc, char *argv[]) {
   QApplication app(argc, argv);
 
   MainWindow mwindow;
+  UiModel model;
 
   int ret = app.exec();
   return ret;

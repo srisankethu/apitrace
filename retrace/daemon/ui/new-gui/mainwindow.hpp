@@ -43,6 +43,7 @@
 
 #include "opendialog.hpp"
 #include "graphwindow.hpp"
+#include "uimodel.hpp"
 
 namespace glretrace {
 

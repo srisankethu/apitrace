@@ -36,6 +36,7 @@
 using glretrace::GraphWindow;
 using glretrace::MainWindow;
 using glretrace::OpenDialog;
+using glretrace::UiModel;
 
 // From Qt style sheets examples "Customizing QSplitter"
 const char *

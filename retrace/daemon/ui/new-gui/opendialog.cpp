@@ -36,6 +36,7 @@
 
 using glretrace::ImageView;
 using glretrace::OpenDialog;
+using glretrace::UiModel;
 
 OpenDialog::OpenDialog(QWidget *parent) : QDialog(parent) {
   layout = new QVBoxLayout(this);

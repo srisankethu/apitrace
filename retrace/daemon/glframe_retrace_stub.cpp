@@ -672,9 +672,11 @@ FrameRetraceStub::Init(const char *host, int port) {
 
 void
 FrameRetraceStub::Shutdown() {
-  assert(m_thread != NULL);
-  m_thread->stop();
-  delete m_thread;
+  // If you never open a file, m_thread will be NULL.
+  if (m_thread != NULL) {
+    m_thread->stop();
+    delete m_thread;
+  }
 }
 
 void

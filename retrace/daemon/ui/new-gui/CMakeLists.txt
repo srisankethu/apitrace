@@ -41,6 +41,8 @@ set (UI_HDRS
   opendialog.hpp
   imageview.hpp
   graphwindow.hpp
+  uimodel.hpp
+  ../glframe_qutil.hpp
 )
 
 set (UI_SRC
@@ -49,6 +51,8 @@ set (UI_SRC
   opendialog.cpp
   imageview.cpp
   graphwindow.cpp
+  uimodel.cpp
+  ../glframe_qutil.cpp
 )
 
 add_executable(fr-new-gui
@@ -66,8 +70,13 @@ set (DL_LIB dl)
 endif ()
 
 target_link_libraries(fr-new-gui
+  retrace_daemon
   retrace_bargraph
+  glretrace_common
+  glhelpers
+  glproc_gl
   Qt5::Core Qt5::Gui Qt5::Concurrent Qt5::Widgets
+  libprotobuf
   ${GL_LIB}
   ${X11_X11_LIB}
   ${DL_LIB}
