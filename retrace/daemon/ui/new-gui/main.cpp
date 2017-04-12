@@ -38,6 +38,7 @@ int main(int argc, char *argv[]) {
 
   MainWindow mwindow;
   UiModel model;
+  mwindow.setModel(&model);
 
   int ret = app.exec();
   return ret;

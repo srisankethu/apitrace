@@ -53,7 +53,11 @@ class MainWindow : public QMainWindow {
   MainWindow();
   ~MainWindow();
 
+  UiModel* getModel() { return model; }
+  void setModel(UiModel* mdl);
+
  protected:
+  // Ui objects
   QSplitter *splitter;
   static const char *handleStyleSheet;
   OpenDialog *dialog;
@@ -71,6 +75,9 @@ class MainWindow : public QMainWindow {
   QLabel *filterLabel;
   QLineEdit *filter;
   QTabWidget *tabs;
+
+  // Model
+  UiModel* model;
 };
 
 }  // namespace glretrace

@@ -42,6 +42,7 @@
 #include <QWidget>
 
 #include "imageview.hpp"
+#include "uimodel.hpp"
 
 namespace glretrace {
 
@@ -51,11 +52,15 @@ class OpenDialog : public QDialog {
   explicit OpenDialog(QWidget *parent = 0);
   virtual ~OpenDialog();
 
+  UiModel* getModel() { return model; }
+  void setModel(UiModel* mdl) { model = mdl; }
+
  public slots:
   void getFilename();
   void openFile();
 
  protected:
+  // Ui objects
   QVBoxLayout *layout;
   ImageView *view;
   QWidget *controls;
@@ -70,6 +75,9 @@ class OpenDialog : public QDialog {
   QLabel *hostLabel;
   QLineEdit *hostEdit;
   QDialogButtonBox *dialogButtons;
+
+  // Model
+  UiModel* model;
 };
 
 }  // namespace glretrace

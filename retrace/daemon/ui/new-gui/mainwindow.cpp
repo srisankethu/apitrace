@@ -58,6 +58,9 @@ MainWindow::handleStyleSheet =
     "}";
 
 MainWindow::MainWindow() {
+  model = NULL;
+
+  // UI setup
   // Create a placeholder widget
   splitter = new QSplitter(Qt::Vertical, this);
   setCentralWidget(splitter);
@@ -125,4 +128,10 @@ MainWindow::MainWindow() {
 
 MainWindow::~MainWindow() {
   delete graph;
+}
+
+void
+MainWindow::setModel(UiModel* mdl) {
+  model = mdl;
+  dialog->setModel(mdl);
 }
