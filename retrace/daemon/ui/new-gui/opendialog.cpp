@@ -30,9 +30,12 @@
 #include <QCoreApplication>
 #include <QFileDialog>
 #include <QIcon>
+#include <QMessageBox>
 #include <QPixmap>
+#include <QPushButton>
 #include <QSize>
 #include <QString>
+#include <QTextStream>
 
 using glretrace::ImageView;
 using glretrace::OpenDialog;
@@ -101,13 +104,21 @@ OpenDialog::OpenDialog(QWidget *parent) : QDialog(parent) {
   connect(dialogButtons, SIGNAL(rejected()), QCoreApplication::instance(),
           SLOT(quit()));
   connect(dialogButtons, SIGNAL(accepted()), this, SLOT(openFile()));
+  dialogButtons->button(QDialogButtonBox::Ok)->setEnabled(false);
   layout->addWidget(dialogButtons);
 
   setWindowTitle("Set Trace File and Frame Number");
   setGeometry(300, 200, 600, 500);
+  connectSignals();
 }
 
 OpenDialog::~OpenDialog() {
+}
+
+void
+OpenDialog::connectSignals() {
+  connect(lineEdit, &QLineEdit::textChanged,
+          this, &OpenDialog::updateDialogButtons);
 }
 
 void
@@ -126,15 +137,33 @@ OpenDialog::getFilename() {
 
 void
 OpenDialog::openFile() {
-  if (model == NULL)
+  if (model == NULL) {
+    QMessageBox::critical(this, "Error", "No UI model.");
     return;
+  }
 
   if (!model->setFrame(lineEdit->text(), frameBox->value(),
                        hostEdit->text())) {
     // There was an error.
-
+    QString message;
+    QTextStream(&message) << "The file " << lineEdit->text()
+                          << " could not be opened.";
+    QMessageBox::critical(this, "Error", message);
   } else {
-    // No-op for now
+    // We have a file.
+    emit fileOpened(lineEdit->text(), frameBox->value(),
+                    hostEdit->text());
     close();
+  }
+}
+
+void
+OpenDialog::updateDialogButtons(QString text) {
+  QPushButton *button = dialogButtons->button(QDialogButtonBox::Ok);
+
+  if (button->isEnabled() && text.isEmpty()) {
+    button->setEnabled(false);
+  } else if (!button->isEnabled() && !text.isEmpty()) {
+    button->setEnabled(true);
   }
 }

@@ -27,19 +27,41 @@
 
 #include <QApplication>
 
+#include "glframe_glhelper.hpp"
+#include "glframe_logger.hpp"
+#include "glframe_os.hpp"
+#include "glframe_socket.hpp"
+#include "glretrace.hpp"
+
 #include "mainwindow.hpp"
 #include "uimodel.hpp"
 
+using glretrace::GlFunctions;
+using glretrace::Logger;
 using glretrace::MainWindow;
+using glretrace::ServerSocket;
+using glretrace::Socket;
 using glretrace::UiModel;
 
 int main(int argc, char *argv[]) {
+  GlFunctions::Init();
+  Logger::Create();
+  Logger::SetSeverity(glretrace::WARN);
+  Socket::Init();
+  Logger::Begin();
+
   QApplication app(argc, argv);
+  app.setOrganizationName("Open Source Technology Center");
+  app.setOrganizationDomain("intel.com");
+  app.setApplicationName("fr-new-gui");
 
   MainWindow mwindow;
   UiModel model;
   mwindow.setModel(&model);
+  mwindow.execDialog();
 
   int ret = app.exec();
+  Logger::Destroy();
+  Socket::Cleanup();
   return ret;
 }

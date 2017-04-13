@@ -55,9 +55,16 @@ class OpenDialog : public QDialog {
   UiModel* getModel() { return model; }
   void setModel(UiModel* mdl) { model = mdl; }
 
+ private:
+  void connectSignals();
+
  public slots:
   void getFilename();
   void openFile();
+  void updateDialogButtons(QString text);
+
+ signals:
+  void fileOpened(QString filename, int frameCount, QString hostname);
 
  protected:
   // Ui objects

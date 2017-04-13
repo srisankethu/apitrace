@@ -84,13 +84,16 @@ class UiModel : public QObject,
              const std::vector<std::string> &api_calls);
   void onError(ErrorSeverity s, const std::string &message);
 
+ signals:
+  void frameCountChanged(int frameCount);
+  void fileLoadFinished();
+
  private:
   FrameRetraceStub m_retrace;
   FrameState *m_state;
   QSelection *m_selection;
   SelectionId m_selection_count;
   QList<int> m_cached_selection;
-  QString main_exe;  // for path to frame_retrace_server
   int m_target_frame_number;
 };
 

@@ -32,6 +32,7 @@
 #include <vector>
 
 #include <QtConcurrentRun>
+#include <QCoreApplication>
 #include <QFileInfo>
 
 #include "glframe_logger.hpp"
@@ -69,12 +70,11 @@ FrameState *frame_state_off_thread(std::string filename,
 static QFuture<FrameState *> future;
 
 void
-exec_retracer(const char *main_exe, int port) {
-  // frame_retrace_server should be at the same path as frame_retrace
-  std::string server_exe(main_exe);
-
+exec_retracer(int port) {
+  std::string server_exe_name, server_exe;
   char sep;
-  std::string server_exe_name;
+
+  server_exe = QCoreApplication::applicationDirPath().toStdString();
 
 #ifdef WIN32
   sep = '\\';
@@ -84,13 +84,7 @@ exec_retracer(const char *main_exe, int port) {
   server_exe_name = "frame_retrace_server";
 #endif
 
-  size_t last_sep = server_exe.rfind(sep);
-
-  if (last_sep != std::string::npos)
-    server_exe.resize(last_sep + 1);
-  else
-    server_exe = std::string("");
-
+  server_exe += sep;
   server_exe += server_exe_name;
 
   std::stringstream port_ss;
@@ -125,7 +119,7 @@ UiModel::setFrame(const QString &filename, int framenumber,
       port = sock.GetPort();
     }
     GRLOGF(glretrace::WARN, "using port: %d", port);
-    exec_retracer(main_exe.toStdString().c_str(), port);
+    exec_retracer(port);
   }
 
   m_retrace.Init(host.toStdString().c_str(), port);
@@ -161,7 +155,10 @@ void
 UiModel::onFileOpening(bool needUpload,
                        bool finished,
                        uint32_t frame_count) {
-
+  emit frameCountChanged(frame_count);
+  if (finished) {
+    emit fileLoadFinished();
+  }
 }
 
 void

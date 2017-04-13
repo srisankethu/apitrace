@@ -32,6 +32,7 @@
 #include <QScreen>
 #include <QSizePolicy>
 #include <QStatusBar>
+#include <QTextStream>
 
 using glretrace::GraphWindow;
 using glretrace::MainWindow;
@@ -113,17 +114,21 @@ MainWindow::MainWindow() {
   tabs->addTab(new QWidget(this), "Metrics");
   splitter->addWidget(tabs);
 
+  // Progress bar
+  pbar = new QProgressBar(this);
+  statusBar()->addPermanentWidget(pbar);
+  pbar->setVisible(false);
+
+  // Open dialog
+  dialog = new OpenDialog(this);
+
   // Window finalization.
   QRect screenGeometry = QGuiApplication::primaryScreen()->geometry();
   screenGeometry.moveTo(0, 0);
   setGeometry(screenGeometry);
   setWindowTitle("Frame Retrace");
   statusBar()->showMessage("Ready");
-
-  // Create the dialog.
-  dialog = new OpenDialog(this);
-  show();
-  dialog->exec();
+  connectSignals();
 }
 
 MainWindow::~MainWindow() {
@@ -131,7 +136,47 @@ MainWindow::~MainWindow() {
 }
 
 void
+MainWindow::connectSignals() {
+  connect(dialog, &OpenDialog::fileOpened,
+          this, &MainWindow::openFile);
+}
+
+void
+MainWindow::execDialog() {
+  // Open the dialog.
+  show();
+  dialog->exec();
+}
+
+void
 MainWindow::setModel(UiModel* mdl) {
   model = mdl;
-  dialog->setModel(mdl);
+  dialog->setModel(model);
+  connect(model, &UiModel::frameCountChanged,
+          this, &MainWindow::updateProgress);
+  connect(model, &UiModel::fileLoadFinished,
+          this, &MainWindow::propagateFileData);
+}
+
+void
+MainWindow::openFile(QString filename, int frameCount,
+                     QString hostname) {
+  pbar->setMinimum(0);
+  pbar->setMaximum(frameCount);
+  pbar->setVisible(true);
+}
+
+void
+MainWindow::updateProgress(int count) {
+  pbar->setValue(count);
+  QString message;
+  QTextStream(&message) << "Retracing frame "
+                        << QString::number(count);
+  statusBar()->showMessage(message);
+}
+
+void
+MainWindow::propagateFileData() {
+  pbar->setVisible(false);
+  statusBar()->clearMessage();
 }

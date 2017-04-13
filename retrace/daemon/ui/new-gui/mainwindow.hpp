@@ -35,6 +35,7 @@
 #include <QMainWindow>
 #include <QLabel>
 #include <QLineEdit>
+#include <QProgressBar>
 #include <QSplitter>
 #include <QStringList>
 #include <QTabWidget>
@@ -56,6 +57,16 @@ class MainWindow : public QMainWindow {
   UiModel* getModel() { return model; }
   void setModel(UiModel* mdl);
 
+  void execDialog();
+
+ private:
+  void connectSignals();
+
+ public slots:
+  void openFile(QString filename, int frameCount, QString hostname);
+  void updateProgress(int count);
+  void propagateFileData();
+
  protected:
   // Ui objects
   QSplitter *splitter;
@@ -75,6 +86,7 @@ class MainWindow : public QMainWindow {
   QLabel *filterLabel;
   QLineEdit *filter;
   QTabWidget *tabs;
+  QProgressBar *pbar;
 
   // Model
   UiModel* model;
