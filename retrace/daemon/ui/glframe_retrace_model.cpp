@@ -334,7 +334,7 @@ FrameRetraceModel::onMetrics(const MetricSeries &metricData,
     m_metrics.append(BarMetrics());
   auto bar = m_metrics.begin();
   for (auto i : metricData.data) {
-    vertical_metric ? bar->metric1 = i : bar->metric2 = i;
+    vertical_metric ? bar->height = i : bar->width = i;
     if (vertical_metric && i > m_max_metric)
       m_max_metric = i;
     ++bar;
@@ -373,8 +373,8 @@ FrameRetraceModel::setMetric(int index, int id) {
   // clear bar data, so stale data will not be displayed.  It may be
   // than one of the metrics we are requesting is "No metric"
   for (auto &bar : m_metrics) {
-    bar.metric1 = 0;
-    bar.metric2 = 0;
+    bar.height = 0;
+    bar.width = 0;
   }
 
   std::vector<MetricId> t_metrics = m_active_metrics;

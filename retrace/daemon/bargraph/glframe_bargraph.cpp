@@ -164,9 +164,9 @@ BarGraphRenderer::setBars(const std::vector<BarMetrics> &bars) {
   max_y = 0;
   total_x = 0;
   for (auto bar : bars) {
-    if (bar.metric1 > max_y)
-      max_y = bar.metric1;
-    total_x += bar.metric2;
+    if (bar.height > max_y)
+      max_y = bar.height;
+    total_x += bar.width;
   }
 
   float extra_bar_width = 0, bar_spacing = 0, start_x = 0;
@@ -185,16 +185,16 @@ BarGraphRenderer::setBars(const std::vector<BarMetrics> &bars) {
     ++current_vertex;
 
     current_vertex->x = current_x;
-    current_vertex->y = bar.metric1;
+    current_vertex->y = bar.height;
     ++current_vertex;
 
-    current_x += (bar.metric2 + extra_bar_width);
+    current_x += (bar.width + extra_bar_width);
     current_vertex->x = current_x;
     current_vertex->y = 0;
     ++current_vertex;
 
     current_vertex->x = current_x;
-    current_vertex->y = bar.metric1;
+    current_vertex->y = bar.height;
     ++current_vertex;
     current_x += bar_spacing;
   }

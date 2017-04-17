@@ -42,8 +42,8 @@ namespace glretrace {
 // bar.  The coordinate system is 0.0 - 1.0 on both axis.
 class BarMetrics {
  public:
-  float metric1;  // bar height
-  float metric2;  // bar width
+  float height;  // bar height
+  float width;  // bar width
 };
 
 class BarGraphSubscriber {
