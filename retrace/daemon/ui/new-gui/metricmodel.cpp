@@ -27,6 +27,8 @@
 
 #include "metricmodel.hpp"
 
+#include <QList>
+
 using glretrace::MetricModel;
 using glretrace::MetricId;
 
@@ -56,4 +58,14 @@ MetricModel::getId(QString name) {
 
   int index = indicesByName.value(name);
   return ids[index];
+}
+
+QVector<QString>
+MetricModel::getNames() {
+  return names;
+}
+
+QStringList
+MetricModel::getNamesList() {
+  return QStringList(QList<QString>::fromVector(names));
 }

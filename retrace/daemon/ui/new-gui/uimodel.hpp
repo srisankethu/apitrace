@@ -32,6 +32,7 @@
 #include <QList>
 #include <QObject>
 #include <QString>
+#include <QStringList>
 
 #include "glframe_qselection.hpp"
 #include "glframe_retrace_interface.hpp"
@@ -88,6 +89,7 @@ class UiModel : public QObject,
  signals:
   void frameCountChanged(int frameCount);
   void fileLoadFinished();
+  void metricNamesReceived(QStringList names);
 
  private:
   FrameRetraceStub m_retrace;

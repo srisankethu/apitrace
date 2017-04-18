@@ -38,6 +38,8 @@
 #include <QProgressBar>
 #include <QSplitter>
 #include <QStringList>
+#include <QStringListModel>
+#include <QSortFilterProxyModel>
 #include <QTabWidget>
 #include <QVBoxLayout>
 #include <QWidget>
@@ -63,6 +65,7 @@ class MainWindow : public QMainWindow {
   void connectSignals();
 
  public slots:
+  void initMetricsTools(QStringList names);
   void openFile(QString filename, int frameCount, QString hostname);
   void updateProgress(int count);
   void propagateFileData();
@@ -80,7 +83,8 @@ class MainWindow : public QMainWindow {
   QHBoxLayout *metricsBarLayout;
   QLabel *ylabel;
   QLabel *xlabel;
-  QStringList metrics;
+  QStringListModel *metrics;
+  QSortFilterProxyModel *metricsProxy;
   QComboBox *yComboBox;
   QComboBox *xComboBox;
   QLabel *filterLabel;

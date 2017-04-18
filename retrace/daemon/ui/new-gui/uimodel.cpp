@@ -192,6 +192,7 @@ UiModel::onMetricList(const std::vector<MetricId> &ids,
                       const std::vector<std::string> &descriptions) {
   delete m_metric_model;
   m_metric_model = new MetricModel(ids, names, descriptions);
+  emit metricNamesReceived(m_metric_model->getNamesList());
 }
 
 // When FrameRetraceStub's method retrace is called,

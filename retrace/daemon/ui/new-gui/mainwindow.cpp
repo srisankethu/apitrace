@@ -81,16 +81,16 @@ MainWindow::MainWindow() {
   metricsBar = new QWidget(this);
   metricsBarLayout = new QHBoxLayout(metricsBar);
   metricsBar->setLayout(metricsBarLayout);
+  metrics = new QStringListModel(this);
+  metricsProxy = new QSortFilterProxyModel(this);
   ylabel = new QLabel("Vertical Metric:", this);
   ylabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
   xlabel = new QLabel("Horizontal Metric:", this);
   xlabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-  metrics << "No Metric" << "Pixel Shader Active Time" <<
-                          "Fragment Shader Active Time";
   yComboBox = new QComboBox(this);
-  yComboBox->addItems(metrics);
+  yComboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
   xComboBox = new QComboBox(this);
-  xComboBox->addItems(metrics);
+  xComboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
   filterLabel = new QLabel("Metrics Filter:", this);
   filterLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
   filter = new QLineEdit(this);
@@ -139,6 +139,9 @@ void
 MainWindow::connectSignals() {
   connect(dialog, &OpenDialog::fileOpened,
           this, &MainWindow::openFile);
+  connect(filter, &QLineEdit::textChanged, metricsProxy,
+          static_cast<void (QSortFilterProxyModel::*)(const QString&)>
+          (&QSortFilterProxyModel::setFilterRegExp));
 }
 
 void
@@ -156,6 +159,8 @@ MainWindow::setModel(UiModel* mdl) {
           this, &MainWindow::updateProgress);
   connect(model, &UiModel::fileLoadFinished,
           this, &MainWindow::propagateFileData);
+  connect(model, &UiModel::metricNamesReceived,
+          this, &MainWindow::initMetricsTools);
 }
 
 void
@@ -179,4 +184,16 @@ void
 MainWindow::propagateFileData() {
   pbar->setVisible(false);
   statusBar()->clearMessage();
+}
+
+void
+MainWindow::initMetricsTools(QStringList names) {
+  metrics->setStringList(QStringList("None") + names);
+
+  // The proxy model makes filtering easy!
+  metricsProxy->setSourceModel(metrics);
+  yComboBox->setModel(metricsProxy);
+  yComboBox->setSizeAdjustPolicy(QComboBox::AdjustToContentsOnFirstShow);
+  xComboBox->setModel(metricsProxy);
+  xComboBox->setSizeAdjustPolicy(QComboBox::AdjustToContentsOnFirstShow);
 }

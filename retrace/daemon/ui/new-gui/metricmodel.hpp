@@ -35,6 +35,7 @@
 #include <QHash>
 #include <QObject>
 #include <QString>
+#include <QStringList>
 #include <QVector>
 
 #include "glframe_retrace_interface.hpp"
@@ -52,6 +53,9 @@ class MetricModel : public QObject {
   ~MetricModel();
 
   MetricId getId(QString name);
+  // QVector, QList, and QStringList are implicitly shared, so this is fast.
+  QVector<QString> getNames();
+  QStringList getNamesList();
 
  protected:
   QHash<QString, int> indicesByName;
