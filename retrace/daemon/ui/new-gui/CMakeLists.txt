@@ -44,6 +44,7 @@ set (UI_HDRS
   graphwindow.hpp
   uimodel.hpp
   ../glframe_qutil.hpp
+  metricmodel.hpp
 )
 
 set (UI_SRC
@@ -54,6 +55,7 @@ set (UI_SRC
   graphwindow.cpp
   uimodel.cpp
   ../glframe_qutil.cpp
+  metricmodel.cpp
 )
 
 add_executable(fr-new-gui

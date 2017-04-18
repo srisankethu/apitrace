@@ -42,6 +42,7 @@
 
 using glretrace::FrameRetraceStub;
 using glretrace::FrameState;
+using glretrace::MetricModel;
 using glretrace::OnFrameRetrace;
 using glretrace::QSelection;
 using glretrace::UiModel;
@@ -51,13 +52,18 @@ using glretrace::ServerSocket;
 
 UiModel::UiModel() : m_state(NULL),
                      m_selection(NULL),
-                     m_selection_count(0) {
+                     m_selection_count(0),
+                     m_metric_model(NULL) {
 }
 
 UiModel::~UiModel() {
   if (m_state) {
     delete m_state;
     m_state = NULL;
+  }
+  if (m_metric_model) {
+    delete m_metric_model;
+    m_metric_model = NULL;
   }
   m_retrace.Shutdown();
 }
@@ -184,6 +190,8 @@ void
 UiModel::onMetricList(const std::vector<MetricId> &ids,
                       const std::vector<std::string> &names,
                       const std::vector<std::string> &descriptions) {
+  delete m_metric_model;
+  m_metric_model = new MetricModel(ids, names, descriptions);
 }
 
 // When FrameRetraceStub's method retrace is called,

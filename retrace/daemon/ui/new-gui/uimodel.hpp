@@ -36,6 +36,7 @@
 #include "glframe_qselection.hpp"
 #include "glframe_retrace_interface.hpp"
 #include "glframe_retrace_stub.hpp"
+#include "metricmodel.hpp"
 
 namespace glretrace {
 
@@ -95,6 +96,7 @@ class UiModel : public QObject,
   SelectionId m_selection_count;
   QList<int> m_cached_selection;
   int m_target_frame_number;
+  MetricModel *m_metric_model;
 };
 
 }  // namespace glretrace
