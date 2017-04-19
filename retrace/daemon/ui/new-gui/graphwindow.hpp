@@ -29,14 +29,22 @@
 #ifndef _GRAPHWINDOW_HPP_
 #define _GRAPHWINDOW_HPP_
 
+#include <QList>
+#include <QMouseEvent>
 #include <QOpenGLWindow>
+#include <QPointF>
+#include <QWheelEvent>
 #include <QWindow>
 
+#include <vector>
+
 #include "glframe_bargraph.hpp"
+#include "glframe_qselection.hpp"
 
 namespace glretrace {
 
-class GraphWindow : public QOpenGLWindow {
+class GraphWindow : public QOpenGLWindow,
+                    public glretrace::BarGraphSubscriber {
   Q_OBJECT
  public:
   // UpdateBehavior options:
@@ -49,12 +57,43 @@ class GraphWindow : public QOpenGLWindow {
                        QWindow *parent = 0);
   virtual ~GraphWindow();
 
+  // OpenGL functions
   void initializeGL();
   void paintGL();
   void resizeGL(int w, int h);
 
+  // Graph-specific functions
+  void setBars(QVector<BarMetrics> bars);
+  void mouseWheel(int degrees, float zoom_point_x);
+  void mouseDrag(float x1, float y1, float x2, float y2);
+  void setTranslation(float value);
+  void setSelection(QList<int> sel);
+
+  // QWindow functions
+  void mousePressEvent(QMouseEvent *e);
+  void mouseMoveEvent(QMouseEvent *e);
+  void mouseReleaseEvent(QMouseEvent *e);
+  void wheelEvent(QWheelEvent *e);
+
+  // Subscriber function
+  void onBarSelect(const std::vector<int> selection);
+
+ signals:
+  void translationChanged(float value);
+  void zoomChanged(float value);
+  void printMessage(QString msg);
+  void barSelect(QList<int> sel);
+
  protected:
   BarGraphRenderer *renderer;
+  QPointF startPos;
+  float zoom;  // range [1.0..]
+  float translation;  // after zoom, translate to keep zoom point in
+                      // place [0..1.0] coordinate system
+  bool clicked;
+  bool shift;
+  QSelection selection;
+  std::vector<float> savedArea;
 };
 
 }  // namespace glretrace

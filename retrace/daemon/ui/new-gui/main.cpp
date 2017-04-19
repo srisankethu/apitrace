@@ -55,6 +55,9 @@ int main(int argc, char *argv[]) {
   app.setOrganizationDomain("intel.com");
   app.setApplicationName("fr-new-gui");
 
+  // Allows for passing QVector<float> through signals and slots.
+  qRegisterMetaType<QVector<float> >("QVector<float>");
+
   MainWindow mwindow;
   UiModel model;
   mwindow.setModel(&model);

@@ -45,6 +45,7 @@ set (UI_HDRS
   uimodel.hpp
   ../glframe_qutil.hpp
   metricmodel.hpp
+  zoombar.hpp
 )
 
 set (UI_SRC
@@ -56,6 +57,7 @@ set (UI_SRC
   uimodel.cpp
   ../glframe_qutil.cpp
   metricmodel.cpp
+  zoombar.cpp
 )
 
 add_executable(fr-new-gui

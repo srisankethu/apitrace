@@ -56,6 +56,8 @@ class UiModel : public QObject,
   QSelection *selection();
   void setSelection(QSelection *s);
 
+  void requestGraphData(QString name);
+
   // OnFrameRetrace interface functions.
   void onFileOpening(bool needUpload,
                      bool finished,
@@ -90,6 +92,8 @@ class UiModel : public QObject,
   void frameCountChanged(int frameCount);
   void fileLoadFinished();
   void metricNamesReceived(QStringList names);
+  // QVector is implicitly shared, so no deep copy occurs.
+  void graphDataReceived(QString name, QVector<float> data);
 
  private:
   FrameRetraceStub m_retrace;

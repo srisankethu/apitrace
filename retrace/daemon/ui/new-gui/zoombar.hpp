@@ -26,49 +26,43 @@
  **************************************************************************/
 
 
-#ifndef _METRICMODEL_HPP_
-#define _METRICMODEL_HPP_
+#ifndef _ZOOMBAR_HPP_
+#define _ZOOMBAR_HPP_
 
-#include <string>
-#include <vector>
-
-#include <QHash>
-#include <QObject>
-#include <QString>
-#include <QStringList>
-#include <QVector>
-
-#include "glframe_retrace_interface.hpp"
+#include <QWidget>
+#include <QHBoxLayout>
+#include <QToolButton>
+#include <QScrollBar>
 
 namespace glretrace {
 
-class MetricModel : public QObject {
+class ZoomBar : public QWidget {
   Q_OBJECT
-
  public:
-  explicit MetricModel(const std::vector<MetricId> &idsVector,
-                       const std::vector<std::string> &namesVector,
-                       const std::vector<std::string> &descVector,
-                       QObject *parent = 0);
-  ~MetricModel();
+  explicit ZoomBar(QWidget *parent = 0);
+  virtual ~ZoomBar();
 
-  MetricId getId(QString name);
-  // QVector, QList, and QStringList are implicitly shared, so this is fast.
-  QString getName(MetricId id);
-  QVector<QString> getNames();
-  QStringList getNamesList();
+ signals:
+  void zoomIn();
+  void zoomOut();
+  void translationChanged(float value);
 
- private:
-  static QString hashId(MetricId id);
+ public slots:
+  void positionHandle();
+  void setZoom(float value);
+  void setTranslation(float value);
+  void updateTranslation(int value);
 
  protected:
-  QHash<QString, int> indicesByName;
-  QHash<QString, int> indicesById;
-  QVector<QString> names;
-  QVector<MetricId> ids;
-  QVector<QString> descriptions;
+  QHBoxLayout *layout;
+  QToolButton *zoomInButton;
+  QScrollBar *scroll;
+  QToolButton *zoomOutButton;
+  static const char *scrollStyleSheet;
+  float zoom;
+  float translation;
 };
 
 }  // namespace glretrace
 
-#endif  // _METRICMODEL_HPP_
+#endif  // _ZOOMBAR_HPP_

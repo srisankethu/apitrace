@@ -31,7 +31,6 @@
 
 #include <QAction>
 #include <QComboBox>
-#include <QHBoxLayout>
 #include <QMainWindow>
 #include <QLabel>
 #include <QLineEdit>
@@ -47,6 +46,8 @@
 #include "opendialog.hpp"
 #include "graphwindow.hpp"
 #include "uimodel.hpp"
+#include "glframe_bargraph.hpp"
+#include "zoombar.hpp"
 
 namespace glretrace {
 
@@ -67,8 +68,15 @@ class MainWindow : public QMainWindow {
  public slots:
   void initMetricsTools(QStringList names);
   void openFile(QString filename, int frameCount, QString hostname);
+  void requestGraphData(QString name);
   void updateProgress(int count);
   void propagateFileData();
+  void updateGraphData(QString name, QVector<float> data);
+
+  void zoomIn();
+  void zoomOut();
+
+  void printMessage(QString msg);
 
  protected:
   // Ui objects
@@ -79,6 +87,7 @@ class MainWindow : public QMainWindow {
   QVBoxLayout *graphAreaLayout;
   GraphWindow *graph;
   QWidget *graphContainer;
+  ZoomBar *zoomBar;
   QWidget *metricsBar;
   QHBoxLayout *metricsBarLayout;
   QLabel *ylabel;
@@ -94,6 +103,11 @@ class MainWindow : public QMainWindow {
 
   // Model
   UiModel* model;
+
+  // Gui Data
+  // Later, we'll move this so it better corresponds to
+  // the model-view-controller framework.
+  QVector<BarMetrics> graphData;
 };
 
 }  // namespace glretrace

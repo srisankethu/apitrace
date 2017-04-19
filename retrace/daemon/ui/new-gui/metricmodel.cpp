@@ -42,6 +42,7 @@ MetricModel::MetricModel(const std::vector<MetricId> &idsVector,
 
   for (int i = 0; i < length; i++) {
     indicesByName.insert(QString::fromStdString(namesVector[i]), i);
+    indicesById.insert(hashId(idsVector[i]), i);
     names.append(QString::fromStdString(namesVector[i]));
     ids.append(idsVector[i]);
     descriptions.append(QString::fromStdString(descVector[i]));
@@ -60,6 +61,15 @@ MetricModel::getId(QString name) {
   return ids[index];
 }
 
+QString
+MetricModel::getName(MetricId id) {
+  if (!indicesById.contains(hashId(id)))
+    return QString();
+
+  int index = indicesById.value(hashId(id));
+  return names[index];
+}
+
 QVector<QString>
 MetricModel::getNames() {
   return names;
@@ -68,4 +78,9 @@ MetricModel::getNames() {
 QStringList
 MetricModel::getNamesList() {
   return QStringList(QList<QString>::fromVector(names));
+}
+
+QString
+MetricModel::hashId(MetricId id) {
+  return QString::number(quint64(id()), 2);
 }

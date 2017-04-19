@@ -31,5 +31,7 @@
         <file>images/document-open.png</file>
         <file>images/drag-me.png</file>
         <file>images/drag-me-pressed.png</file>
+        <file>images/zoom-in-symbolic.symbolic.png</file>
+        <file>images/zoom-out-symbolic.symbolic.png</file>
     </qresource>
 </RCC>
