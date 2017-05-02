@@ -235,4 +235,16 @@ UiModel::onApi(SelectionId selectionCount,
 
 void
 UiModel::onError(ErrorSeverity s, const std::string &message) {
+  GRLOG(ERR, message.c_str());
+
+  // split on newline, to provide additional context behind the "show
+  // details" button.
+  QString m(message.c_str());
+  QStringList m_l = m.split("\n");
+  QString general_error = m_l[0];
+  QString general_error_details = "";
+  if (m_l.size() > 1)
+    general_error_details = m_l[1];
+  bool fatal = (s == RETRACE_FATAL);
+  emit generalError(general_error, general_error_details, fatal);
 }

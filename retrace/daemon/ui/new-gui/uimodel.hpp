@@ -94,6 +94,7 @@ class UiModel : public QObject,
   void metricNamesReceived(QStringList names);
   // QVector is implicitly shared, so no deep copy occurs.
   void graphDataReceived(QString name, QVector<float> data);
+  void generalError(QString text, QString details, bool fatal);
 
  private:
   FrameRetraceStub m_retrace;

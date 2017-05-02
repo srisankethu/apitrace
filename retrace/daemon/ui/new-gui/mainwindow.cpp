@@ -28,6 +28,7 @@
 #include "mainwindow.hpp"
 
 #include <QGuiApplication>
+#include <QMessageBox>
 #include <QRect>
 #include <QScreen>
 #include <QSizePolicy>
@@ -182,6 +183,8 @@ MainWindow::setModel(UiModel* mdl) {
           this, &MainWindow::initMetricsTools);
   connect(model, &UiModel::graphDataReceived,
           this, &MainWindow::updateGraphData);
+  connect(model, &UiModel::generalError,
+          this, &MainWindow::errorMessage);
 }
 
 void
@@ -281,4 +284,26 @@ MainWindow::zoomOut() {
 void
 MainWindow::printMessage(QString msg) {
   statusBar()->showMessage(msg);
+}
+
+void
+MainWindow::errorMessage(QString text, QString details, bool fatal) {
+  QMessageBox msgBox (this);
+  msgBox.setText(text);
+  msgBox.setDetailedText(details);
+  if (fatal) {
+    msgBox.setIcon(QMessageBox::Critical);
+    msgBox.setWindowTitle("Frame Retrace: Fatal Error");
+  }
+  else {
+    msgBox.setIcon(QMessageBox::Warning);
+    msgBox.setWindowTitle("Frame Retrace: Warning");
+  }
+  msgBox.setStandardButtons(QMessageBox::Ok);
+  msgBox.setDefaultButton(QMessageBox::Ok);
+
+  msgBox.exec();
+
+  if (fatal)
+    QCoreApplication::instance()->quit();
 }

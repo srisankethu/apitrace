@@ -77,6 +77,7 @@ class MainWindow : public QMainWindow {
   void zoomOut();
 
   void printMessage(QString msg);
+  void errorMessage(QString text, QString details, bool fatal = false);
 
  protected:
   // Ui objects
