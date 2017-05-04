@@ -46,6 +46,13 @@ set (UI_HDRS
   ../glframe_qutil.hpp
   metricmodel.hpp
   zoombar.hpp
+  shadertab.hpp
+  shaderdisplay.hpp
+  shadermodel.hpp
+  rendershaders.hpp
+  tabwidget.hpp
+  findwidget.hpp
+  shadertextwidget.hpp
 )
 
 set (UI_SRC
@@ -58,6 +65,13 @@ set (UI_SRC
   ../glframe_qutil.cpp
   metricmodel.cpp
   zoombar.cpp
+  shadertab.cpp
+  shaderdisplay.cpp
+  shadermodel.cpp
+  rendershaders.cpp
+  tabwidget.cpp
+  findwidget.cpp
+  shadertextwidget.cpp
 )
 
 add_executable(fr-new-gui

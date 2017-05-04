@@ -78,6 +78,9 @@ class GraphWindow : public QOpenGLWindow,
   // Subscriber function
   void onBarSelect(const std::vector<int> selection);
 
+ public slots:
+  void printSelection(QList<int> sel);
+
  signals:
   void translationChanged(float value);
   void zoomChanged(float value);

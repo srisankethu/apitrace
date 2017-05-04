@@ -49,6 +49,8 @@ GraphWindow::GraphWindow(UpdateBehavior updateBehavior,
           &selection, &QSelection::select);
   connect(&selection, &QSelection::onSelect,
           this, &GraphWindow::setSelection);
+  connect(this, &GraphWindow::barSelect,
+          this, &GraphWindow::printSelection);
 }
 
 GraphWindow::~GraphWindow() {
@@ -101,14 +103,14 @@ GraphWindow::setBars(QVector<BarMetrics> bars) {
 
 void
 GraphWindow::onBarSelect(const std::vector<int> selection) {
-  emit printMessage("bar select");
+  // emit printMessage("bar select");
   QVector<int> vec = QVector<int>::fromStdVector(selection);
   emit barSelect(vec.toList());
 }
 
 void
 GraphWindow::mousePressEvent(QMouseEvent *e) {
-  emit printMessage("press");
+  // emit printMessage("press");
   startPos = QPointF(e->pos());
   QPointF winSize = QPointF(width(), height());
   startPos.setX(startPos.x()/winSize.x());
@@ -121,7 +123,7 @@ GraphWindow::mousePressEvent(QMouseEvent *e) {
 void
 GraphWindow::mouseMoveEvent(QMouseEvent *e) {
   if (e->buttons() & Qt::LeftButton) {
-    emit printMessage("move");
+    // emit printMessage("move");
     QPointF endPos, mousePos, winSize;
     winSize = QPointF(width(), height());
     mousePos = QPointF(e->pos());
@@ -135,7 +137,7 @@ GraphWindow::mouseMoveEvent(QMouseEvent *e) {
 
 void
 GraphWindow::mouseReleaseEvent(QMouseEvent *e) {
-  emit printMessage("release");
+  // emit printMessage("release");
   clicked = true;
   shift = e->modifiers() & Qt::ShiftModifier;
   update();
@@ -143,7 +145,7 @@ GraphWindow::mouseReleaseEvent(QMouseEvent *e) {
 
 void
 GraphWindow::wheelEvent(QWheelEvent *e) {
-  emit printMessage("wheel");
+  // emit printMessage("wheel");
   float wheelx = 1.0;
   wheelx = ((float) e->x())/((float) width());
   mouseWheel(((float) e->angleDelta().y())/5, wheelx);
@@ -196,4 +198,15 @@ GraphWindow::setSelection(QList<int> sel) {
   for (auto i : sel)
     s.insert(i);
   renderer->setSelection(s);
+}
+
+void
+GraphWindow::printSelection(QList<int> sel) {
+  QString msg;
+  for (int i = 0; i < sel.length(); i++) {
+    msg.append(QString::number(sel.at(i)));
+    if (i != sel.length() - 1)
+      msg.append(", ");
+  }
+  emit printMessage(msg);
 }

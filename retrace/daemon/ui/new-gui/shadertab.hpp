@@ -26,93 +26,64 @@
  **************************************************************************/
 
 
-#ifndef _MAINWINDOW_HPP_
-#define _MAINWINDOW_HPP_
+#ifndef _SHADERTAB_HPP_
+#define _SHADERTAB_HPP_
 
-#include <QAction>
-#include <QComboBox>
-#include <QMainWindow>
-#include <QLabel>
-#include <QLineEdit>
-#include <QProgressBar>
-#include <QSplitter>
+#include <QHBoxLayout>
+#include <QListView>
 #include <QStringList>
 #include <QStringListModel>
-#include <QSortFilterProxyModel>
-#include <QVBoxLayout>
+#include <QTabWidget>
+#include <QTextEdit>
 #include <QWidget>
 
-#include "opendialog.hpp"
-#include "graphwindow.hpp"
 #include "uimodel.hpp"
-#include "glframe_bargraph.hpp"
-#include "shadertab.hpp"
-#include "zoombar.hpp"
+#include "shaderdisplay.hpp"
+#include "rendershaders.hpp"
 #include "tabwidget.hpp"
 
 namespace glretrace {
 
-class MainWindow : public QMainWindow {
+class ShaderTab : public QWidget {
   Q_OBJECT
  public:
-  MainWindow();
-  ~MainWindow();
+  explicit ShaderTab(QWidget *parent = 0);
+  virtual ~ShaderTab();
 
   UiModel* getModel() { return model; }
   void setModel(UiModel* mdl);
 
-  void execDialog();
-
- private:
-  void connectSignals();
-
  public slots:
-  void initMetricsTools(QStringList names);
-  void openFile(QString filename, int frameCount, QString hostname);
-  void requestGraphData(QString name);
-  void updateProgress(int count);
-  void propagateFileData();
-  void updateGraphData(QString name, QVector<float> data);
+  void setRenders(QStringList r);
+  void convertActivation(const QModelIndex &index);
+  void populateTabs(RenderShaders *rs);
 
-  void zoomIn();
-  void zoomOut();
-
+ signals:
+  void shaderActivated(int index);
   void printMessage(QString msg);
-  void errorMessage(QString text, QString details, bool fatal = false);
 
  protected:
-  // Ui objects
-  QSplitter *splitter;
-  static const char *handleStyleSheet;
-  OpenDialog *dialog;
-  QWidget *graphArea;
-  QVBoxLayout *graphAreaLayout;
-  GraphWindow *graph;
-  QWidget *graphContainer;
-  ZoomBar *zoomBar;
-  QWidget *metricsBar;
-  QHBoxLayout *metricsBarLayout;
-  QLabel *ylabel;
-  QLabel *xlabel;
-  QStringListModel *metrics;
-  QSortFilterProxyModel *metricsProxy;
-  QComboBox *yComboBox;
-  QComboBox *xComboBox;
-  QLabel *filterLabel;
-  QLineEdit *filter;
+  QHBoxLayout *layout;
+  QStringList renders;
+  QStringListModel *rendersModel;
+  QListView *renderSelection;
+  static const char *listStyleSheet;
   TabWidget *tabs;
-  ShaderTab *shaderTab;
-  QProgressBar *pbar;
+  ShaderDisplay *vertex;
+  ShaderDisplay *fragment;
+  QTabWidget *tesselation;
+  ShaderDisplay *tessControl;
+  ShaderDisplay *tessEval;
+  ShaderDisplay *geometry;
+  ShaderDisplay *compute;
 
   // Model
   UiModel* model;
 
-  // Gui Data
-  // Later, we'll move this so it better corresponds to
-  // the model-view-controller framework.
-  QVector<BarMetrics> graphData;
+ private:
+  void makeConnections();
 };
 
 }  // namespace glretrace
 
-#endif  // _MAINWINDOW_HPP_
+#endif  // _SHADERTAB_HPP_

@@ -38,6 +38,8 @@
 #include "glframe_retrace_interface.hpp"
 #include "glframe_retrace_stub.hpp"
 #include "metricmodel.hpp"
+#include "shadermodel.hpp"
+#include "rendershaders.hpp"
 
 namespace glretrace {
 
@@ -95,6 +97,14 @@ class UiModel : public QObject,
   // QVector is implicitly shared, so no deep copy occurs.
   void graphDataReceived(QString name, QVector<float> data);
   void generalError(QString text, QString details, bool fatal);
+  void renderStrings(QStringList renders);
+  void needShaderText(int renderIndex);
+  void shaderTextObject(RenderShaders *rs);
+  void printMessage(QString msg);
+  void hasShaders();
+
+ public slots:
+  void getShaderText(int renderIndex);
 
  private:
   FrameRetraceStub m_retrace;
@@ -104,6 +114,7 @@ class UiModel : public QObject,
   QList<int> m_cached_selection;
   int m_target_frame_number;
   MetricModel *m_metric_model;
+  ShaderModel *m_shader_model;
 };
 
 }  // namespace glretrace

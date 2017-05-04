@@ -38,6 +38,7 @@
 using glretrace::GraphWindow;
 using glretrace::MainWindow;
 using glretrace::OpenDialog;
+using glretrace::TabWidget;
 using glretrace::UiModel;
 
 // From Qt style sheets examples "Customizing QSplitter"
@@ -109,10 +110,13 @@ MainWindow::MainWindow() {
   splitter->addWidget(graphArea);
 
   // Tab Widget
-  tabs = new QTabWidget(this);
+  tabs = new TabWidget(this);
   tabs->setSizePolicy(QSizePolicy::Expanding,
                       QSizePolicy::Expanding);
-  tabs->addTab(new QWidget(this), "Shaders");
+  shaderTab = new ShaderTab(this);
+  tabs->addTab(shaderTab, "Shaders");
+  // Hide Shaders tab until Shaders data exists.
+  tabs->setTabVisible(shaderTab, false);
   tabs->addTab(new QWidget(this), "RenderTarget");
   tabs->addTab(new QWidget(this), "API Calls");
   tabs->addTab(new QWidget(this), "Metrics");
@@ -162,6 +166,8 @@ MainWindow::connectSignals() {
           graph, &GraphWindow::setTranslation);
   connect(graph, &GraphWindow::printMessage,
           this, &MainWindow::printMessage);
+  connect(shaderTab, &ShaderTab::printMessage,
+          this, &MainWindow::printMessage);
 }
 
 void
@@ -175,6 +181,7 @@ void
 MainWindow::setModel(UiModel* mdl) {
   model = mdl;
   dialog->setModel(model);
+  shaderTab->setModel(model);
   connect(model, &UiModel::frameCountChanged,
           this, &MainWindow::updateProgress);
   connect(model, &UiModel::fileLoadFinished,
@@ -185,6 +192,10 @@ MainWindow::setModel(UiModel* mdl) {
           this, &MainWindow::updateGraphData);
   connect(model, &UiModel::generalError,
           this, &MainWindow::errorMessage);
+  connect(model, &UiModel::printMessage,
+          this, &MainWindow::printMessage);
+  connect(model, &UiModel::hasShaders,
+          [=]() { tabs->setTabVisible(shaderTab, true); });
 }
 
 void
@@ -234,7 +245,6 @@ MainWindow::updateGraphData(QString name, QVector<float> data) {
   if (name == QString()) {
     name = QString("None");
   }
-  statusBar()->showMessage(name);
 
   if (graphData.isEmpty()) {
      for (int i = 0; i < data.size(); i++) {
