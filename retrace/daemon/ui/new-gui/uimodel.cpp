@@ -288,7 +288,7 @@ void
 UiModel::getShaderText(int renderIndex) {
   QString msg = "here ";
   msg.append(QString::number(renderIndex));
-  emit printMessage(msg);
+  // emit printMessage(msg);
   if (m_shader_model)
     m_shader_model->getShaderText(renderIndex);
 }

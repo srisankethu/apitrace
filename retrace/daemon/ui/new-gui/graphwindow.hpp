@@ -80,12 +80,14 @@ class GraphWindow : public QOpenGLWindow,
 
  public slots:
   void printSelection(QList<int> sel);
+  void setOneSelection(int sel);
 
  signals:
   void translationChanged(float value);
   void zoomChanged(float value);
   void printMessage(QString msg);
   void barSelect(QList<int> sel);
+  void firstSelected(int sel);
 
  protected:
   BarGraphRenderer *renderer;

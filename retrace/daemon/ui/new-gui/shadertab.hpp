@@ -56,6 +56,7 @@ class ShaderTab : public QWidget {
  public slots:
   void setRenders(QStringList r);
   void convertActivation(const QModelIndex &index);
+  void activateShader(int index);
   void populateTabs(RenderShaders *rs);
 
  signals:

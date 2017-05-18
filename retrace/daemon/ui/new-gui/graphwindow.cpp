@@ -106,6 +106,8 @@ GraphWindow::onBarSelect(const std::vector<int> selection) {
   // emit printMessage("bar select");
   QVector<int> vec = QVector<int>::fromStdVector(selection);
   emit barSelect(vec.toList());
+  if (selection.size() >= 1)
+    emit firstSelected(selection[0]);
 }
 
 void
@@ -209,4 +211,13 @@ GraphWindow::printSelection(QList<int> sel) {
       msg.append(", ");
   }
   emit printMessage(msg);
+}
+
+void
+GraphWindow::setOneSelection(int sel) {
+  QList<int> selList;
+  selList.append(sel);
+  selection.select(selList);
+  printSelection(selList);
+  update();
 }

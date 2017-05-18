@@ -134,6 +134,14 @@ ShaderTab::convertActivation(const QModelIndex &index) {
 }
 
 void
+ShaderTab::activateShader(int index) {
+  QModelIndex midx = rendersModel->index(index, 0);
+  renderSelection->setCurrentIndex(midx);
+  if (model)
+    model->needShaderText(index);
+}
+
+void
 ShaderTab::populateTabs(RenderShaders *rs) {
   vertex->populate(rs, "vertex");
   tabs->setTabVisible(vertex, vertex->hasText());

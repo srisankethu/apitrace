@@ -168,6 +168,10 @@ MainWindow::connectSignals() {
           this, &MainWindow::printMessage);
   connect(shaderTab, &ShaderTab::printMessage,
           this, &MainWindow::printMessage);
+  connect(shaderTab, &ShaderTab::shaderActivated,
+          graph, &GraphWindow::setOneSelection);
+  connect(graph, &GraphWindow::firstSelected,
+          shaderTab, &ShaderTab::activateShader);
 }
 
 void
