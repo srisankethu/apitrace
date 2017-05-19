@@ -146,11 +146,12 @@ UiModel::setFrame(const QString &filename, int framenumber,
   m_retrace.openFile(filename.toStdString(), md5, 0,
                      framenumber, this);
 
-  RenderSelection sel;
-  glretrace::renderSelectionFromList(m_selection_count,
-                                     m_cached_selection,
-                                     &sel);
-  m_retrace.retraceApi(sel, this);
+  // Why is this here?
+  // RenderSelection sel;
+  // glretrace::renderSelectionFromList(m_selection_count,
+  //                                    m_cached_selection,
+  //                                    &sel);
+  // m_retrace.retraceApi(sel, this);
   return true;
 }
 
@@ -195,6 +196,7 @@ UiModel::onFileOpening(bool needUpload,
     ++m_selection_count;
     all.push_back(0, m_state->getRenderCount()-1);
     m_retrace.retraceShaderAssembly(all, this);
+    m_retrace.retraceApi(all, this);
 
     // Make a request for a set of NULL (width = 1.0) data.
     std::vector<MetricId> ids;
@@ -266,6 +268,11 @@ void
 UiModel::onApi(SelectionId selectionCount,
                RenderId renderId,
                const std::vector<std::string> &api_calls) {
+  QStringList callsList;
+  for (int i = 0; i < api_calls.size(); i++) {
+    callsList.append(QString::fromStdString(api_calls[i]));
+  }
+  m_api_calls.append(callsList);
 }
 
 void
@@ -291,4 +298,14 @@ UiModel::getShaderText(int renderIndex) {
   // emit printMessage(msg);
   if (m_shader_model)
     m_shader_model->getShaderText(renderIndex);
+}
+
+void
+UiModel::getApiText(int idx) {
+  QStringList apiText;
+
+  if (m_api_calls.size() > idx)
+    apiText = m_api_calls[idx];
+
+  emit apiTextObject(apiText);
 }

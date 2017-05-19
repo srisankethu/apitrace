@@ -33,6 +33,7 @@
 #include <QObject>
 #include <QString>
 #include <QStringList>
+#include <QVector>
 
 #include "glframe_qselection.hpp"
 #include "glframe_retrace_interface.hpp"
@@ -102,9 +103,11 @@ class UiModel : public QObject,
   void shaderTextObject(RenderShaders *rs);
   void printMessage(QString msg);
   void hasShaders();
+  void apiTextObject(QStringList text);
 
  public slots:
   void getShaderText(int renderIndex);
+  void getApiText(int idx);
 
  private:
   FrameRetraceStub m_retrace;
@@ -115,6 +118,7 @@ class UiModel : public QObject,
   int m_target_frame_number;
   MetricModel *m_metric_model;
   ShaderModel *m_shader_model;
+  QVector<QStringList> m_api_calls;
 };
 
 }  // namespace glretrace

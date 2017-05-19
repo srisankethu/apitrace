@@ -118,7 +118,8 @@ MainWindow::MainWindow() {
   // Hide Shaders tab until Shaders data exists.
   tabs->setTabVisible(shaderTab, false);
   tabs->addTab(new QWidget(this), "RenderTarget");
-  tabs->addTab(new QWidget(this), "API Calls");
+  apiTab = new ApiTab(this);
+  tabs->addTab(apiTab, "API Calls");
   tabs->addTab(new QWidget(this), "Metrics");
   splitter->addWidget(tabs);
 
@@ -172,6 +173,16 @@ MainWindow::connectSignals() {
           graph, &GraphWindow::setOneSelection);
   connect(graph, &GraphWindow::firstSelected,
           shaderTab, &ShaderTab::activateShader);
+  connect(apiTab, &ApiTab::printMessage,
+          this, &MainWindow::printMessage);
+  connect(apiTab, &ApiTab::shaderActivated,
+          graph, &GraphWindow::setOneSelection);
+  connect(graph, &GraphWindow::firstSelected,
+          apiTab, &ApiTab::activateShader);
+  connect(apiTab, &ApiTab::shaderActivated,
+          shaderTab, &ShaderTab::activateShader);
+  connect(shaderTab, &ShaderTab::shaderActivated,
+          apiTab, &ApiTab::activateShader);
 }
 
 void
@@ -186,6 +197,7 @@ MainWindow::setModel(UiModel* mdl) {
   model = mdl;
   dialog->setModel(model);
   shaderTab->setModel(model);
+  apiTab->setModel(model);
   connect(model, &UiModel::frameCountChanged,
           this, &MainWindow::updateProgress);
   connect(model, &UiModel::fileLoadFinished,
