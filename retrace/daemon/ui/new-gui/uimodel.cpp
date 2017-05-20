@@ -34,6 +34,8 @@
 #include <QtConcurrentRun>
 #include <QCoreApplication>
 #include <QFileInfo>
+#include <QImage>
+#include <QPixmap>
 #include <QString>
 #include <QStringList>
 
@@ -231,6 +233,10 @@ void
 UiModel::onRenderTarget(SelectionId selectionCount,
                         ExperimentId experimentCount,
                         const uvec & pngImageData) {
+    QImage rt;
+    rt.loadFromData(pngImageData.data(), pngImageData.size(), "PNG");
+    QPixmap rtp = QPixmap::fromImage(rt);
+    emit renderImage(rtp);
 }
 
 // Automatically called when file is opened to give this model
@@ -308,4 +314,20 @@ UiModel::getApiText(int idx) {
     apiText = m_api_calls[idx];
 
   emit apiTextObject(apiText);
+}
+
+void
+UiModel::requestRenderTarget(int idx, RenderOptions opt,
+                             RenderTargetType rtt) {
+  m_cached_selection.clear();
+  m_cached_selection.append(idx);
+  ++m_selection_count;
+  RenderSelection rs;
+  glretrace::renderSelectionFromList(m_selection_count,
+                                     m_cached_selection,
+                                     &rs);
+  m_retrace.retraceRenderTarget(ExperimentId(0),
+                                rs,
+                                rtt,
+                                opt, this);
 }

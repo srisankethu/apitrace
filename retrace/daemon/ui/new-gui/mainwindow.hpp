@@ -50,6 +50,7 @@
 #include "zoombar.hpp"
 #include "tabwidget.hpp"
 #include "apitab.hpp"
+#include "rendertab.hpp"
 
 namespace glretrace {
 
@@ -104,6 +105,7 @@ class MainWindow : public QMainWindow {
   TabWidget *tabs;
   ShaderTab *shaderTab;
   ApiTab *apiTab;
+  RenderTab *renderTab;
   QProgressBar *pbar;
 
   // Model

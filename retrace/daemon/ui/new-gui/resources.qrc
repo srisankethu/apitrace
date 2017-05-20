@@ -33,5 +33,8 @@
         <file>images/drag-me-pressed.png</file>
         <file>images/zoom-in-symbolic.symbolic.png</file>
         <file>images/zoom-out-symbolic.symbolic.png</file>
+        <file>images/no-render-target.png</file>
+        <file>images/drag-me-transposed.png</file>
+        <file>images/drag-me-pressed-transposed.png</file>
     </qresource>
 </RCC>

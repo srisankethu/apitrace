@@ -76,6 +76,7 @@ MainWindow::MainWindow() {
   graphArea->setLayout(graphAreaLayout);
   graph = new GraphWindow();
   graphContainer = QWidget::createWindowContainer(graph, this);
+  graphContainer->setMinimumSize(QSize(640, 128));
   graphContainer->setSizePolicy(QSizePolicy::Expanding,
                                 QSizePolicy::Expanding);
   graphAreaLayout->addWidget(graphContainer);
@@ -117,7 +118,8 @@ MainWindow::MainWindow() {
   tabs->addTab(shaderTab, "Shaders");
   // Hide Shaders tab until Shaders data exists.
   tabs->setTabVisible(shaderTab, false);
-  tabs->addTab(new QWidget(this), "RenderTarget");
+  renderTab = new RenderTab(this);
+  tabs->addTab(renderTab, "RenderTarget");
   apiTab = new ApiTab(this);
   tabs->addTab(apiTab, "API Calls");
   tabs->addTab(new QWidget(this), "Metrics");
@@ -169,12 +171,14 @@ MainWindow::connectSignals() {
           this, &MainWindow::printMessage);
   connect(shaderTab, &ShaderTab::printMessage,
           this, &MainWindow::printMessage);
-  connect(shaderTab, &ShaderTab::shaderActivated,
-          graph, &GraphWindow::setOneSelection);
-  connect(graph, &GraphWindow::firstSelected,
-          shaderTab, &ShaderTab::activateShader);
   connect(apiTab, &ApiTab::printMessage,
           this, &MainWindow::printMessage);
+
+  // On select connections
+  connect(shaderTab, &ShaderTab::shaderActivated,
+          graph, &GraphWindow::setOneSelection);
+  connect(graph, &GraphWindow::firstSelected,
+          shaderTab, &ShaderTab::activateShader);
   connect(apiTab, &ApiTab::shaderActivated,
           graph, &GraphWindow::setOneSelection);
   connect(graph, &GraphWindow::firstSelected,
@@ -183,6 +187,12 @@ MainWindow::connectSignals() {
           shaderTab, &ShaderTab::activateShader);
   connect(shaderTab, &ShaderTab::shaderActivated,
           apiTab, &ApiTab::activateShader);
+  connect(shaderTab, &ShaderTab::shaderActivated,
+          renderTab, &RenderTab::requestRenderTarget);
+  connect(apiTab, &ApiTab::shaderActivated,
+          renderTab, &RenderTab::requestRenderTarget);
+  connect(graph, &GraphWindow::firstSelected,
+          renderTab, &RenderTab::requestRenderTarget);
 }
 
 void
@@ -198,6 +208,7 @@ MainWindow::setModel(UiModel* mdl) {
   dialog->setModel(model);
   shaderTab->setModel(model);
   apiTab->setModel(model);
+  renderTab->setModel(model);
   connect(model, &UiModel::frameCountChanged,
           this, &MainWindow::updateProgress);
   connect(model, &UiModel::fileLoadFinished,
@@ -212,6 +223,8 @@ MainWindow::setModel(UiModel* mdl) {
           this, &MainWindow::printMessage);
   connect(model, &UiModel::hasShaders,
           [=]() { tabs->setTabVisible(shaderTab, true); });
+  connect(model, &UiModel::renderImage,
+          renderTab, &RenderTab::setRenderImage);
 }
 
 void

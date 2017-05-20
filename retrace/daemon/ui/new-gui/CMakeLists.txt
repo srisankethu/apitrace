@@ -54,6 +54,7 @@ set (UI_HDRS
   findwidget.hpp
   shadertextwidget.hpp
   apitab.hpp
+  rendertab.hpp
 )
 
 set (UI_SRC
@@ -74,6 +75,7 @@ set (UI_SRC
   findwidget.cpp
   shadertextwidget.cpp
   apitab.cpp
+  rendertab.cpp
 )
 
 add_executable(fr-new-gui
