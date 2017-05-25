@@ -31,6 +31,7 @@
 
 #include <QList>
 #include <QObject>
+#include <QStandardItemModel>
 #include <QString>
 #include <QStringList>
 #include <QVector>
@@ -105,6 +106,8 @@ class UiModel : public QObject,
   void hasShaders();
   void apiTextObject(QStringList text);
   void renderImage(QPixmap p);
+  void tableReady(QStandardItemModel *table);
+  void tableDataReceived(QString name, float data);
 
  public slots:
   void getShaderText(int renderIndex);

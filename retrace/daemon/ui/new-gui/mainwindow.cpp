@@ -28,6 +28,7 @@
 #include "mainwindow.hpp"
 
 #include <QGuiApplication>
+#include <QHeaderView>
 #include <QMessageBox>
 #include <QRect>
 #include <QScreen>
@@ -122,7 +123,14 @@ MainWindow::MainWindow() {
   tabs->addTab(renderTab, "RenderTarget");
   apiTab = new ApiTab(this);
   tabs->addTab(apiTab, "API Calls");
-  tabs->addTab(new QWidget(this), "Metrics");
+  metricsTab = new QTableView(this);
+  metricsTab->horizontalHeader()->hide();
+  metricsTab->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+  metricsTab->setAlternatingRowColors(true);
+  metricsTab->verticalHeader()->hide();
+  metricsTable = new QSortFilterProxyModel(this);
+  metricsTab->setModel(metricsTable);
+  tabs->addTab(metricsTab, "Metrics");
   splitter->addWidget(tabs);
 
   // Progress bar
@@ -151,6 +159,9 @@ MainWindow::connectSignals() {
   connect(dialog, &OpenDialog::fileOpened,
           this, &MainWindow::openFile);
   connect(filter, &QLineEdit::textChanged, metricsProxy,
+          static_cast<void (QSortFilterProxyModel::*)(const QString&)>
+          (&QSortFilterProxyModel::setFilterRegExp));
+  connect(filter, &QLineEdit::textChanged, metricsTable,
           static_cast<void (QSortFilterProxyModel::*)(const QString&)>
           (&QSortFilterProxyModel::setFilterRegExp));
   connect(yComboBox, static_cast<void(QComboBox::*)(int)>
@@ -225,6 +236,8 @@ MainWindow::setModel(UiModel* mdl) {
           [=]() { tabs->setTabVisible(shaderTab, true); });
   connect(model, &UiModel::renderImage,
           renderTab, &RenderTab::setRenderImage);
+  connect(model, &UiModel::tableReady,
+          this, &MainWindow::setTable);
 }
 
 void
@@ -345,4 +358,10 @@ MainWindow::errorMessage(QString text, QString details, bool fatal) {
 
   if (fatal)
     QCoreApplication::instance()->quit();
+}
+
+void
+MainWindow::setTable(QStandardItemModel *table) {
+  metricsTable->setSourceModel(table);
+  metricsTab->resizeColumnsToContents();
 }

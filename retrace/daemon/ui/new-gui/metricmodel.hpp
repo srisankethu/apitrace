@@ -34,6 +34,7 @@
 
 #include <QHash>
 #include <QObject>
+#include <QStandardItemModel>
 #include <QString>
 #include <QStringList>
 #include <QVector>
@@ -57,16 +58,29 @@ class MetricModel : public QObject {
   QString getName(MetricId id);
   QVector<QString> getNames();
   QStringList getNamesList();
+  QStandardItemModel* getTable() { return tableModel; }
+  void setRender(int idx) { index = idx; }
+
+ signals:
+  void tableReady(QStandardItemModel* tbl);
+
+ public slots:
+  void updateTableData(QString name, float data);
 
  private:
   static QString hashId(MetricId id);
+  int getNumericalIndex(QString name);
 
  protected:
+  // This is redundant, because QVector has a find() function.
+  // Fix later.
   QHash<QString, int> indicesByName;
   QHash<QString, int> indicesById;
   QVector<QString> names;
   QVector<MetricId> ids;
   QVector<QString> descriptions;
+  QStandardItemModel *tableModel;
+  int index;
 };
 
 }  // namespace glretrace

@@ -247,7 +247,12 @@ UiModel::onMetricList(const std::vector<MetricId> &ids,
                       const std::vector<std::string> &descriptions) {
   delete m_metric_model;
   m_metric_model = new MetricModel(ids, names, descriptions);
+  connect(this, &UiModel::tableDataReceived,
+          m_metric_model, &MetricModel::updateTableData);
+  connect(m_metric_model, &MetricModel::tableReady,
+          this, &UiModel::tableReady);
   emit metricNamesReceived(m_metric_model->getNamesList());
+  emit tableReady(m_metric_model->getTable());
 }
 
 // When FrameRetraceStub's method retrace is called,
@@ -257,10 +262,17 @@ void
 UiModel::onMetrics(const MetricSeries &metricData,
                    ExperimentId experimentCount,
                    SelectionId selectionCount) {
+  int length = m_state->getRenderCount();
   // Resolve the name and pass on the data.
   QString name = m_metric_model->getName(metricData.metric);
-  emit graphDataReceived(name,
-    QVector<float>::fromStdVector(metricData.data));
+
+  if (metricData.data.size() == length) {
+    emit graphDataReceived(name,
+      QVector<float>::fromStdVector(metricData.data));
+  } else if (metricData.data.size() == 1) {
+    emit tableDataReceived(name, metricData.data[0]);
+  }
+
 }
 
 void
@@ -321,6 +333,8 @@ UiModel::requestRenderTarget(int idx, RenderOptions opt,
                              RenderTargetType rtt) {
   m_cached_selection.clear();
   m_cached_selection.append(idx);
+  if (m_metric_model)
+    m_metric_model->setRender(idx);
   ++m_selection_count;
   RenderSelection rs;
   glretrace::renderSelectionFromList(m_selection_count,
@@ -330,4 +344,5 @@ UiModel::requestRenderTarget(int idx, RenderOptions opt,
                                 rs,
                                 rtt,
                                 opt, this);
+  m_retrace.retraceAllMetrics(rs, ExperimentId(0), this);
 }

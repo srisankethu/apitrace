@@ -35,10 +35,13 @@ using glretrace::MetricId;
 MetricModel::MetricModel(const std::vector<MetricId> &idsVector,
                          const std::vector<std::string> &namesVector,
                          const std::vector<std::string> &descVector,
-                         QObject *parent) : QObject(parent) {
+                         QObject *parent) : QObject(parent),
+                                            index(0) {
   int length = idsVector.size();
   assert(length == namesVector.size());
   assert(length == descVector.size());
+
+  tableModel = new QStandardItemModel(length, 2, this);
 
   for (int i = 0; i < length; i++) {
     indicesByName.insert(QString::fromStdString(namesVector[i]), i);
@@ -46,6 +49,10 @@ MetricModel::MetricModel(const std::vector<MetricId> &idsVector,
     names.append(QString::fromStdString(namesVector[i]));
     ids.append(idsVector[i]);
     descriptions.append(QString::fromStdString(descVector[i]));
+
+    // Fill the table.
+    tableModel->setItem(i, 0, new QStandardItem(names[i]));
+    tableModel->setItem(i, 1, new QStandardItem("--"));
   }
 }
 
@@ -59,6 +66,15 @@ MetricModel::getId(QString name) {
 
   int index = indicesByName.value(name);
   return ids[index];
+}
+
+int
+MetricModel::getNumericalIndex(QString name) {
+  if (!indicesByName.contains(name))
+    return -1;
+
+  int index = indicesByName.value(name);
+  return index;
 }
 
 QString
@@ -83,4 +99,16 @@ MetricModel::getNamesList() {
 QString
 MetricModel::hashId(MetricId id) {
   return QString::number(quint64(id()), 2);
+}
+
+void
+MetricModel::updateTableData(QString name, float data) {
+  int row = getNumericalIndex(name);
+  if (row == -1) // It's an invalid name.
+    return;
+
+  tableModel->setItem(row, 1,
+    new QStandardItem(QString::number(data)));
+
+  emit tableReady(tableModel);
 }

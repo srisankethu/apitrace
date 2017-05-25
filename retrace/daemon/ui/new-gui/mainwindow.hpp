@@ -36,9 +36,11 @@
 #include <QLineEdit>
 #include <QProgressBar>
 #include <QSplitter>
+#include <QStandardItemModel>
 #include <QStringList>
 #include <QStringListModel>
 #include <QSortFilterProxyModel>
+#include <QTableView>
 #include <QVBoxLayout>
 #include <QWidget>
 
@@ -75,6 +77,7 @@ class MainWindow : public QMainWindow {
   void updateProgress(int count);
   void propagateFileData();
   void updateGraphData(QString name, QVector<float> data);
+  void setTable(QStandardItemModel *table);
 
   void zoomIn();
   void zoomOut();
@@ -106,6 +109,8 @@ class MainWindow : public QMainWindow {
   ShaderTab *shaderTab;
   ApiTab *apiTab;
   RenderTab *renderTab;
+  QSortFilterProxyModel *metricsTable;
+  QTableView *metricsTab;
   QProgressBar *pbar;
 
   // Model
