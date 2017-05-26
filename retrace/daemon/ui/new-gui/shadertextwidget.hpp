@@ -51,6 +51,7 @@ class ShaderTextWidget : public QWidget {
 
  signals:
   void printMessage(QString msg);
+  void compileNeeded();
 
  protected:
   QVBoxLayout *layout;

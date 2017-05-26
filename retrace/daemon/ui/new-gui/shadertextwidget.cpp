@@ -72,6 +72,8 @@ ShaderTextWidget::ShaderTextWidget(QWidget *parent) : QWidget(parent) {
 
   connect(findWidget, &FindWidget::printMessage,
           this, &ShaderTextWidget::printMessage);
+  connect(compileButton, &QPushButton::clicked,
+          this, &ShaderTextWidget::compileNeeded);
 }
 
 ShaderTextWidget::~ShaderTextWidget() {

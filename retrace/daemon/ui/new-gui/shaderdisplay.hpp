@@ -49,6 +49,7 @@ class ShaderDisplay : public TabWidget {
 
  signals:
   void printMessage(QString msg);
+  void compileNeeded();
 
  private:
   ShaderTextWidget* initTab(QString name);

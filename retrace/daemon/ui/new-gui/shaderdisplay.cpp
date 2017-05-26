@@ -55,6 +55,8 @@ ShaderDisplay::ShaderDisplay(QWidget *parent) : TabWidget(parent) {
           this, &ShaderDisplay::printMessage);
   connect(nir, &ShaderTextWidget::printMessage,
           this, &ShaderDisplay::printMessage);
+  connect(source, &ShaderTextWidget::compileNeeded,
+          this, &ShaderDisplay::compileNeeded);
 }
 
 ShaderDisplay::~ShaderDisplay() {
