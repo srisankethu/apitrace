@@ -222,3 +222,9 @@ QUniformsModel::clear()  {
     m_uniforms_by_renderid.clear();
   }
 }
+
+void
+QUniformsModel::setUniform(const QString &name,
+                           const int index,
+                           const QString &value) {
+}
