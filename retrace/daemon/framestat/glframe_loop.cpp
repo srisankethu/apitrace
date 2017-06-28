@@ -78,38 +78,17 @@ FrameLoop::~FrameLoop() {
   delete m_out;
 }
 
-void
-FrameLoop::advanceToFrame(int f) {
-  *m_out << std::endl << f;
-  for (auto c : m_calls)
-    delete c;
-  m_calls.clear();
-
-  trace::Call *call;
-  while ((call = parser->parse_call()) && m_current_frame < f) {
-    retracer.retrace(*call);
-    const bool frame_boundary = call->flags & trace::CALL_FLAG_END_FRAME;
-    delete call;
-    if (frame_boundary) {
-      ++m_current_frame;
-      if (m_current_frame == f)
-        break;
-    }
-  }
-
-  while ((call = parser->parse_call())) {
-    m_calls.push_back(call);
-    retracer.retrace(*call);
-    const bool frame_boundary = call->flags & trace::CALL_FLAG_END_FRAME;
-    if (frame_boundary) {
-      // do not count bogus frame terminators
-      if (strncmp("glFrameTerminatorGREMEDY", call->sig->name,
-                  strlen("glFrameTerminatorGREMEDY")) != 0)
-        ++m_current_frame;
-      break;
-    }
-  }
+bool frame_boundary(const trace::Call &c) {
+  const bool end_frame = c.flags & trace::CALL_FLAG_END_FRAME;
+  if (!end_frame)
+    return false;
+  // do not count bogus frame terminators
+  if (strncmp("glFrameTerminatorGREMEDY", c.sig->name,
+              strlen("glFrameTerminatorGREMEDY")) != 0)
+    return true;
+  return false;
 }
+
 #ifdef _MSC_VER
 #include "Windows.h"
 inline unsigned int
@@ -134,24 +113,48 @@ get_ms_time() {
 #endif
 
 void
+FrameLoop::advanceToFrame(int f) {
+  // 1st value: frame number
+  // 2nd value: start parse time
+  *m_out << std::endl << f << "\t" << get_ms_time();
+  for (auto c : m_calls)
+    delete c;
+  m_calls.clear();
+
+  trace::Call *call;
+  while ((call = parser->parse_call()) && m_current_frame < f) {
+    retracer.retrace(*call);
+    const bool end_frame = frame_boundary(*call);
+    delete call;
+    if (end_frame) {
+      ++m_current_frame;
+      if (m_current_frame == f)
+        break;
+    }
+  }
+
+  while ((call = parser->parse_call())) {
+    m_calls.push_back(call);
+    if (frame_boundary(*call)) {
+      ++m_current_frame;
+      break;
+    }
+  }
+
+  // 3rd value: end of parse time
+  *m_out << "\t" << get_ms_time();
+}
+
+void
 FrameLoop::loop() {
-  // warm up with 5 frames
-  // retrace count frames and output frame time
-  for (int i = 0; i < 5; ++i) {
-    for (auto c : m_calls) {
-      retracer.retrace(*c);
-    }
+  for (auto c : m_calls) {
+    retracer.retrace(*c);
   }
-  GlFunctions::Finish();
-  unsigned int begin = get_ms_time();
-  for (int i = 0; i < m_loop_count; ++i) {
-    for (auto c : m_calls) {
-      retracer.retrace(*c);
-    }
-    GlFunctions::Finish();
-    const unsigned int end = get_ms_time();
-    *m_out << "\t" << end - begin;
-    begin = end;
-  }
+  // 4th value: end of retrace time
+  *m_out << "\t" << get_ms_time();
+
+  // 5th value: end of finish time
+  // GlFunctions::Finish();
+  // *m_out << "\t" << get_ms_time();
 }
 
