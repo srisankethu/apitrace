@@ -43,7 +43,8 @@ class FrameLoop {
  public:
   FrameLoop(const std::string filepath,
             const std::string out_path,
-            int loop_count);
+            int loop_count,
+            bool flush_after_parse, bool flush_after_draw);
   ~FrameLoop();
   void advanceToFrame(int f);
   void loop();
@@ -52,6 +53,7 @@ class FrameLoop {
   std::ofstream m_of;
   std::ostream *m_out;
   int m_current_frame, m_loop_count;
+  bool m_flush_parse, m_flush_draw;
   std::vector<trace::Call*> m_calls;
 };
 

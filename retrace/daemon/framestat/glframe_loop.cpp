@@ -46,10 +46,14 @@ extern retrace::Retracer retracer;
 
 FrameLoop::FrameLoop(const std::string filepath,
                      const std::string out_path,
-                     int loop_count)
+                     int loop_count,
+                     bool flush_after_parse,
+                     bool flush_after_draw)
     : m_of(), m_out(NULL),
       m_current_frame(1),
-      m_loop_count(loop_count) {
+      m_loop_count(loop_count),
+      m_flush_parse(flush_after_parse),
+      m_flush_draw(flush_after_draw) {
   if (out_path.size()) {
     m_of.open(out_path);
     m_out = new std::ostream(m_of.rdbuf());
@@ -140,8 +144,11 @@ FrameLoop::advanceToFrame(int f) {
       break;
     }
   }
-
   // 3rd value: end of parse time
+  *m_out << "\t" << get_ms_time();
+  if (m_flush_parse)
+    GlFunctions::Finish();
+  // 4rd value: end of parse flush time
   *m_out << "\t" << get_ms_time();
 }
 
@@ -150,11 +157,13 @@ FrameLoop::loop() {
   for (auto c : m_calls) {
     retracer.retrace(*c);
   }
-  // 4th value: end of retrace time
+  // 5th value: end of retrace time
   *m_out << "\t" << get_ms_time();
 
-  // 5th value: end of finish time
-  // GlFunctions::Finish();
-  // *m_out << "\t" << get_ms_time();
+  if (m_flush_draw)
+    GlFunctions::Finish();
+
+  // 6th value: end of finish time
+  *m_out << "\t" << get_ms_time();
 }
 

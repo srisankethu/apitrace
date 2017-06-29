@@ -39,10 +39,11 @@ int main(int argc, char *argv[]) {
   int loop_count = 0;
   std::string frame_file, out_file;
   std::vector<int> frames;
+  bool flush_after_parse = false, flush_after_draw = false;
   const char *usage = "USAGE: framestat -n {loop_count} [-o {out_file}]"
-                      "-f {trace} frame_1 frame_2 ... frame_n\n";
+                      "-f {trace} [-p] [-d] frame_1 frame_2 ... frame_n\n";
   int opt;
-  while ((opt = getopt(argc, argv, "n:f:p:o:h")) != -1) {
+  while ((opt = getopt(argc, argv, "n:f:o:hpd")) != -1) {
     switch (opt) {
       case 'n':
         loop_count = atoi(optarg);
@@ -52,6 +53,12 @@ int main(int argc, char *argv[]) {
         continue;
       case 'o':
         out_file = optarg;
+        continue;
+      case 'p':
+        flush_after_parse = true;
+        continue;
+      case 'd':
+        flush_after_draw = true;
         continue;
       case 'h':
       default: /* '?' */
@@ -81,7 +88,8 @@ int main(int argc, char *argv[]) {
     return -1;
   }
   glretrace::GlFunctions::Init();
-  FrameLoop loop(frame_file, out_file, loop_count);
+  FrameLoop loop(frame_file, out_file, loop_count,
+                 flush_after_parse, flush_after_draw);
   for (auto f : frames) {
     loop.advanceToFrame(f);
     loop.loop();
