@@ -44,55 +44,6 @@ using trace::Call;
 
 extern retrace::Retracer retracer;
 
-FrameLoop::FrameLoop(const std::string filepath,
-                     const std::string out_path,
-                     int loop_count,
-                     bool flush_after_parse,
-                     bool flush_after_draw)
-    : m_of(), m_out(NULL),
-      m_current_frame(1),
-      m_loop_count(loop_count),
-      m_flush_parse(flush_after_parse),
-      m_flush_draw(flush_after_draw) {
-  if (out_path.size()) {
-    m_of.open(out_path);
-    m_out = new std::ostream(m_of.rdbuf());
-  } else {
-    m_out = new std::ostream(std::cout.rdbuf());
-  }
-  *m_out << filepath << std::endl;
-  *m_out << "frame";
-  for (int i = 0; i < loop_count; ++i)
-    *m_out << "\t" << i;
-  *m_out << std::endl;
-
-  retrace::debug = 0;
-  retracer.addCallbacks(glretrace::gl_callbacks);
-  retracer.addCallbacks(glretrace::glx_callbacks);
-  retracer.addCallbacks(glretrace::wgl_callbacks);
-  retracer.addCallbacks(glretrace::cgl_callbacks);
-  retracer.addCallbacks(glretrace::egl_callbacks);
-  retrace::setUp();
-  parser->open(filepath.c_str());
-}
-
-FrameLoop::~FrameLoop() {
-  if (m_of.is_open())
-    m_of.close();
-  delete m_out;
-}
-
-bool frame_boundary(const trace::Call &c) {
-  const bool end_frame = c.flags & trace::CALL_FLAG_END_FRAME;
-  if (!end_frame)
-    return false;
-  // do not count bogus frame terminators
-  if (strncmp("glFrameTerminatorGREMEDY", c.sig->name,
-              strlen("glFrameTerminatorGREMEDY")) != 0)
-    return true;
-  return false;
-}
-
 #ifdef _MSC_VER
 #include "Windows.h"
 inline unsigned int
@@ -116,11 +67,64 @@ get_ms_time() {
 }
 #endif
 
+FrameLoop::FrameLoop(const std::string filepath,
+                     const std::string out_path,
+                     int loop_count,
+                     bool flush_after_parse,
+                     bool flush_after_draw)
+    : m_of(), m_out(NULL),
+      m_current_frame(1),
+      m_loop_count(loop_count),
+      m_flush_parse(flush_after_parse),
+      m_flush_draw(flush_after_draw) {
+  if (out_path.size()) {
+    m_of.open(out_path);
+    m_out = new std::ostream(m_of.rdbuf());
+  } else {
+    m_out = new std::ostream(std::cout.rdbuf());
+  }
+  *m_out << filepath << std::endl;
+  *m_out << "frame";
+  for (int i = 0; i < loop_count; ++i)
+    *m_out << "\t" << i;
+  *m_out << std::endl;
+  *m_out << std::endl;
+  *m_out << std::endl;
+  *m_out << "start: " << get_ms_time() << std::endl;
+
+  retrace::debug = 0;
+  retracer.addCallbacks(glretrace::gl_callbacks);
+  retracer.addCallbacks(glretrace::glx_callbacks);
+  retracer.addCallbacks(glretrace::wgl_callbacks);
+  retracer.addCallbacks(glretrace::cgl_callbacks);
+  retracer.addCallbacks(glretrace::egl_callbacks);
+  retrace::setUp();
+  parser->open(filepath.c_str());
+}
+
+FrameLoop::~FrameLoop() {
+  *m_out << "end: " << get_ms_time() << std::endl;
+  if (m_of.is_open())
+    m_of.close();
+  delete m_out;
+}
+
+bool frame_boundary(const trace::Call &c) {
+  const bool end_frame = c.flags & trace::CALL_FLAG_END_FRAME;
+  if (!end_frame)
+    return false;
+  // do not count bogus frame terminators
+  if (strncmp("glFrameTerminatorGREMEDY", c.sig->name,
+              strlen("glFrameTerminatorGREMEDY")) != 0)
+    return true;
+  return false;
+}
+
 void
 FrameLoop::advanceToFrame(int f) {
   // 1st value: frame number
   // 2nd value: start parse time
-  *m_out << std::endl << f << "\t" << get_ms_time();
+  // *m_out << std::endl << f << "\t" << get_ms_time();
   for (auto c : m_calls)
     delete c;
   m_calls.clear();
@@ -145,11 +149,11 @@ FrameLoop::advanceToFrame(int f) {
     }
   }
   // 3rd value: end of parse time
-  *m_out << "\t" << get_ms_time();
+  // *m_out << "\t" << get_ms_time();
   if (m_flush_parse)
     GlFunctions::Finish();
   // 4rd value: end of parse flush time
-  *m_out << "\t" << get_ms_time();
+  // *m_out << "\t" << get_ms_time();
 }
 
 void
@@ -158,12 +162,12 @@ FrameLoop::loop() {
     retracer.retrace(*c);
   }
   // 5th value: end of retrace time
-  *m_out << "\t" << get_ms_time();
+  // *m_out << "\t" << get_ms_time();
 
   if (m_flush_draw)
     GlFunctions::Finish();
 
   // 6th value: end of finish time
-  *m_out << "\t" << get_ms_time();
+  // *m_out << "\t" << get_ms_time();
 }
 
