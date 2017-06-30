@@ -131,7 +131,7 @@ FrameLoop::advanceToFrame(int f) {
 
   trace::Call *call;
   while ((call = parser->parse_call()) && m_current_frame < f) {
-    retracer.retrace(*call);
+    // retracer.retrace(*call);
     const bool end_frame = frame_boundary(*call);
     delete call;
     if (end_frame) {
@@ -158,9 +158,9 @@ FrameLoop::advanceToFrame(int f) {
 
 void
 FrameLoop::loop() {
-  for (auto c : m_calls) {
-    retracer.retrace(*c);
-  }
+  // for (auto c : m_calls) {
+  //   // retracer.retrace(*c);
+  // }
   // 5th value: end of retrace time
   // *m_out << "\t" << get_ms_time();
 
