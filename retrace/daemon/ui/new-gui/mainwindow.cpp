@@ -37,26 +37,45 @@ using glretrace::GraphWindow;
 using glretrace::MainWindow;
 using glretrace::OpenDialog;
 
+// From Qt style sheets examples "Customizing QSplitter"
+const char *
+MainWindow::handleStyleSheet =
+    "QSplitter::handle {\n"
+    "  image: url(:images/drag-me.png);\n"
+    "}\n"
+    "\n"
+    "QSplitter::handle:horizontal {\n"
+    "  width: 11px;\n"
+    "}\n"
+    "\n"
+    "QSplitter::handle:vertical {\n"
+    "  height: 2px;\n"
+    "}\n"
+    "\n"
+    "QSplitter::handle:pressed {\n"
+    "  image: url(:images/drag-me-pressed.png);\n"
+    "}";
+
 MainWindow::MainWindow() {
   // Create a placeholder widget
-  centralWidget = new QWidget(this);
-  layout = new QVBoxLayout(centralWidget);
-  centralWidget->setLayout(layout);
-  setCentralWidget(centralWidget);
-
+  splitter = new QSplitter(Qt::Vertical, this);
+  setCentralWidget(splitter);
+  splitter->setStyleSheet(handleStyleSheet);
 
   // Graph
+  graphArea = new QWidget(this);
+  graphAreaLayout = new QVBoxLayout(graphArea);
+  graphArea->setLayout(graphAreaLayout);
   graph = new GraphWindow();
-  graphContainer = QWidget::createWindowContainer(graph, centralWidget);
+  graphContainer = QWidget::createWindowContainer(graph, this);
   graphContainer->setSizePolicy(QSizePolicy::Expanding,
                                 QSizePolicy::Expanding);
-  layout->addWidget(graphContainer);
+  graphAreaLayout->addWidget(graphContainer);
 
   // Tool bar.
   metricsBar = new QWidget(this);
   metricsBarLayout = new QHBoxLayout(metricsBar);
   metricsBar->setLayout(metricsBarLayout);
-  layout->addWidget(metricsBar);
   ylabel = new QLabel("Vertical Metric:", this);
   ylabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
   xlabel = new QLabel("Horizontal Metric:", this);
@@ -77,14 +96,18 @@ MainWindow::MainWindow() {
   metricsBarLayout->addWidget(yComboBox);
   metricsBarLayout->addWidget(xlabel);
   metricsBarLayout->addWidget(xComboBox);
+  graphAreaLayout->addWidget(metricsBar);
+  splitter->addWidget(graphArea);
 
   // Tab Widget
   tabs = new QTabWidget(this);
+  tabs->setSizePolicy(QSizePolicy::Expanding,
+                      QSizePolicy::Expanding);
   tabs->addTab(new QWidget(this), "Shaders");
   tabs->addTab(new QWidget(this), "RenderTarget");
   tabs->addTab(new QWidget(this), "API Calls");
   tabs->addTab(new QWidget(this), "Metrics");
-  layout->addWidget(tabs);
+  splitter->addWidget(tabs);
 
   // Window finalization.
   QRect screenGeometry = QGuiApplication::primaryScreen()->geometry();

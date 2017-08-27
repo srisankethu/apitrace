@@ -35,6 +35,7 @@
 #include <QMainWindow>
 #include <QLabel>
 #include <QLineEdit>
+#include <QSplitter>
 #include <QStringList>
 #include <QTabWidget>
 #include <QVBoxLayout>
@@ -52,9 +53,11 @@ class MainWindow : public QMainWindow {
   ~MainWindow();
 
  protected:
-  QWidget *centralWidget;
-  QVBoxLayout *layout;
+  QSplitter *splitter;
+  static const char *handleStyleSheet;
   OpenDialog *dialog;
+  QWidget *graphArea;
+  QVBoxLayout *graphAreaLayout;
   GraphWindow *graph;
   QWidget *graphContainer;
   QWidget *metricsBar;

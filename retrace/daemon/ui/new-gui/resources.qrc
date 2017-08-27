@@ -29,5 +29,7 @@
     <qresource prefix="/">
         <file>images/fr.png</file>
         <file>images/document-open.png</file>
+        <file>images/drag-me.png</file>
+        <file>images/drag-me-pressed.png</file>
     </qresource>
 </RCC>
