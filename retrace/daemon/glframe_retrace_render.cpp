@@ -425,3 +425,30 @@ RetraceRender::setUniform(const std::string &name, int index,
                           const std::string &data) {
   m_uniform_override->setUniform(name, index, data);
 }
+
+std::string cull_to_string(GLint cull) {
+  switch (cull) {
+    case GL_FRONT:
+      return std::string("GL_FRONT");
+    case GL_BACK:
+      return std::string("GL_BACK");
+    case GL_FRONT_AND_BACK:
+      return std::string("GL_FRONT_AND_BACK");
+    default:
+      assert(false);
+  }
+}
+
+void
+RetraceRender::onState(SelectionId selId,
+                       ExperimentId experimentCount,
+                       RenderId renderId,
+                       OnFrameRetrace *callback) {
+  {
+    GLint cull;
+    GlFunctions::GetIntegerv(GL_CULL_FACE, &cull);
+    callback->onState(selId, experimentCount, renderId,
+                      StateKey(CULL_FACE, 0),
+                      cull_to_string(cull));
+  }
+}

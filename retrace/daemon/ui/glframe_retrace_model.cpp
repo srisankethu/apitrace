@@ -604,3 +604,13 @@ void
 FrameRetraceModel::setTab(const int index) {
   m_current_tab = static_cast<TabIndex>(index);
 }
+
+
+void
+FrameRetraceModel::onState(SelectionId selectionCount,
+                           ExperimentId experimentCount,
+                           RenderId renderId,
+                           StateKey item,
+                           const std::string &value) {
+  assert(false);
+}
