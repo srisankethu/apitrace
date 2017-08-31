@@ -402,7 +402,7 @@ FrameRetraceSkeleton::Run() {
           state_resp->set_experiment_count(-1);
           state_resp->set_value("");
           auto r_item = state_resp->mutable_item();
-          r_item->set_name(ApiTrace::StateItem(0));
+          r_item->set_name(ApiTrace::StateItem(ApiTrace::INVALID_STATE_ITEM));
           r_item->set_index(0);
           writeResponse(m_socket, proto_response, &m_buf);
           break;

@@ -946,6 +946,7 @@ class StateRequest : public IRetraceRequest {
     auto stateRequest = m_proto_msg.mutable_state();
     auto selectionRequest = stateRequest->mutable_selection();
     makeRenderSelection(selection, selectionRequest);
+    stateRequest->set_experiment_count((*current_experiment)());
     m_proto_msg.set_requesttype(ApiTrace::STATE_REQUEST);
   }
   virtual void retrace(RetraceSocket *s) {

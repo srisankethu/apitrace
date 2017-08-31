@@ -435,6 +435,8 @@ FrameRetraceModel::onSelect(SelectionId id, QList<int> selection) {
     retrace_uniforms();
   if (m_current_tab == kMetrics)
     m_metrics_table.onSelect(id, selection);
+  if (m_current_tab == kState)
+    retrace_state();
 
   // refresh other tabs
   if (m_current_tab != kRenderTarget)
@@ -449,6 +451,8 @@ FrameRetraceModel::onSelect(SelectionId id, QList<int> selection) {
     retrace_uniforms();
   if (m_current_tab != kMetrics)
     m_metrics_table.onSelect(id, selection);
+  if (m_current_tab != kState)
+    retrace_state();
 }
 
 void
@@ -564,6 +568,8 @@ FrameRetraceModel::onExperiment(ExperimentId experiment_count) {
     retrace_uniforms();
   if (m_current_tab == kMetrics)
     m_metrics_table.onExperiment(experiment_count);
+  if (m_current_tab == kState)
+    retrace_state();
 
   // refresh the rest of the tabs
   if (m_current_tab != kRenderTarget)
@@ -576,6 +582,8 @@ FrameRetraceModel::onExperiment(ExperimentId experiment_count) {
     retrace_uniforms();
   if (m_current_tab != kMetrics)
     m_metrics_table.onExperiment(experiment_count);
+  if (m_current_tab != kState)
+    retrace_state();
 }
 
 void
@@ -612,5 +620,14 @@ FrameRetraceModel::onState(SelectionId selectionCount,
                            RenderId renderId,
                            StateKey item,
                            const std::string &value) {
-  assert(false);
+  std::cout << value << "\n";
+}
+
+void
+FrameRetraceModel::retrace_state() {
+  RenderSelection sel;
+  glretrace::renderSelectionFromList(m_selection_count,
+                                     m_cached_selection,
+                                     &sel);
+  m_retrace.retraceState(sel, m_experiment_count, this);
 }

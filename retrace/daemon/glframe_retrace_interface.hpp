@@ -257,6 +257,7 @@ enum UniformDimension {
 // implementations of IFrameRetrace.
 enum StateItem {
   CULL_FACE = 0x0B44,
+  CULL_FACE_MODE = 0x0B45,
 };
 
 struct StateKey {

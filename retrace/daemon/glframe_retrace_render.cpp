@@ -445,10 +445,26 @@ RetraceRender::onState(SelectionId selId,
                        RenderId renderId,
                        OnFrameRetrace *callback) {
   {
+    GL::GetError();
+    GLboolean cull_enabled = GlFunctions::IsEnabled(GL_CULL_FACE);
+    GLenum e = GL::GetError();
+    if (e == GL_NO_ERROR) {
+      callback->onState(selId, experimentCount, renderId,
+                        StateKey(CULL_FACE, 0),
+                        cull_enabled ? "true" : "false");
+    }
+  }
+  {
+    GL::GetError();
     GLint cull;
-    GlFunctions::GetIntegerv(GL_CULL_FACE, &cull);
-    callback->onState(selId, experimentCount, renderId,
-                      StateKey(CULL_FACE, 0),
-                      cull_to_string(cull));
+    GlFunctions::GetIntegerv(GL_CULL_FACE_MODE, &cull);
+    GLenum e = GL::GetError();
+    if (e == GL_NO_ERROR) {
+      const std::string cull_str = cull_to_string(cull);
+      if (cull_str.size() > 0) {
+        callback->onState(selId, experimentCount, renderId,
+                          StateKey(CULL_FACE_MODE, 0), cull_str);
+      }
+    }
   }
 }

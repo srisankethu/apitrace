@@ -232,6 +232,8 @@ message StateRequest {
 
 enum StateItem {
   CULL_FACE = 0x0B44;
+  CULL_FACE_MODE = 0x0B45;
+  INVALID_STATE_ITEM = 0x0;
 }
 
 message StateKey {

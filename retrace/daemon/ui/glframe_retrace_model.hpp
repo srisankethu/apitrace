@@ -229,6 +229,7 @@ class FrameRetraceModel : public QObject,
   void retrace_api();
   void retrace_batch();
   void retrace_uniforms();
+  void retrace_state();
   void refreshBarMetrics();
 
   enum TabIndex {
@@ -238,7 +239,8 @@ class FrameRetraceModel : public QObject,
     kBatch,
     kMetrics,
     kExperiments,
-    kUniforms
+    kUniforms,
+    kState
   };
 
   mutable std::mutex m_protect;
