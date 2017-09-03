@@ -90,6 +90,12 @@ FrameRetraceModel::~FrameRetraceModel() {
     m_state = NULL;
   }
   m_retrace.Shutdown();
+  delete m_rendertarget;
+  delete m_uniforms;
+  delete m_stateModel;
+  for (auto i : m_metrics_model)
+    delete i;
+  m_metrics_model.clear();
 }
 
 FrameState *frame_state_off_thread(std::string filename,
