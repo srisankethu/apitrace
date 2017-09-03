@@ -82,7 +82,7 @@ class QStateModel : public QObject,
                RenderId renderId,
                StateKey item,
                const std::string &value);
-  // void clear();
+  void clear();
   Q_INVOKABLE void setState(const QString &name,
                             const int index,
                             const QString &value);
@@ -98,6 +98,8 @@ class QStateModel : public QObject,
   ExperimentId m_experiment_count;
   // typedef QList<QStateValue*> StateList;
   std::map<std::string, QStateValue*> m_state_by_name;
+  QList<QStateValue*> m_states;
+  std::vector<QStateValue*> m_for_deletion;
   mutable std::mutex m_protect;
 };
 
