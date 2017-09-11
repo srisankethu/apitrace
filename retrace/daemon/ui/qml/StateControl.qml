@@ -8,6 +8,7 @@ Item {
     ScrollView {
         anchors.fill: parent
         ListView {
+            id: stateList
             model: stateModel.state
             anchors.fill: parent
             delegate: Component {
@@ -18,12 +19,15 @@ Item {
                     }
                     Grid {
                         id: stateGrid
-                        columns: 1 // todo
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        height: 100
+                        columns: 4
                         Repeater {
                             model: modelData.values
                             delegate: Component {
                                 Rectangle {
-                                    width: stateGrid.width
+                                    width: stateList.width / 4
                                     height: stateText.height
                                     border.width: 1
                                     Text {
