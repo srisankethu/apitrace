@@ -30,6 +30,7 @@
 #include <string>
 #include <vector>
 
+#include "glframe_logger.hpp"
 #include "glframe_os.hpp"
 
 using glretrace::QStateModel;
@@ -45,6 +46,8 @@ QStateValue::QStateValue(const std::string &_name,
 
 void
 QStateValue::insert(int index, const std::string &value) {
+  GRLOGF(glretrace::WARN, "%s: %d %s", m_name.toStdString().c_str(), index,
+         value.c_str());
   while (m_values.size() < index)
     m_values.append(QString());
   if (m_values.size() == index)

@@ -24,15 +24,16 @@ Item {
                         height: 100
                         columns: 4
                         Repeater {
-                            model: modelData.values
+                            model: { "one", "two" }
+                            // model: modelData.values
                             delegate: Component {
                                 Rectangle {
-                                    width: stateList.width / 4
-                                    height: stateText.height
+                                    width: 20
+                                    height: 20
                                     border.width: 1
                                     Text {
                                         id: stateText
-                                        text: modelData
+                                        text: "hello" + modelData
                                     }
                                 }
                             }
