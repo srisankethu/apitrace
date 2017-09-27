@@ -41,7 +41,7 @@ QStateValue::QStateValue(const std::string &_name,
                          const std::vector<std::string> &_choices)
     : m_name(_name.c_str()) {
   for (auto c : _choices)
-    m_choices.append(QString::fromStdString(c));
+    m_choices.append(QVariant(c.c_str()));
 }
 
 void
@@ -49,11 +49,11 @@ QStateValue::insert(int index, const std::string &value) {
   GRLOGF(glretrace::WARN, "%s: %d %s", m_name.toStdString().c_str(), index,
          value.c_str());
   while (m_values.size() < index)
-    m_values.append(QString());
+    m_values.append("");
   if (m_values.size() == index)
-    m_values.append(QString::fromStdString(value));
+    m_values.append(value.c_str());
   else
-    m_values[index] = QString::fromStdString(value);
+    m_values[index] = QVariant(value.c_str());
 }
 
 QStateModel::QStateModel() {}

@@ -17,24 +17,21 @@ Item {
                         id: nameText
                         text: modelData.name
                     }
-                    Grid {
+                    Row {
                         id: stateGrid
                         anchors.left: parent.left
                         anchors.right: parent.right
-                        height: 100
-                        columns: 4
                         Repeater {
-                            model: { "one", "two" }
-                            // model: modelData.values
-                            delegate: Component {
-                                Rectangle {
-                                    width: 20
-                                    height: 20
-                                    border.width: 1
-                                    Text {
-                                        id: stateText
-                                        text: "hello" + modelData
-                                    }
+                            model: modelData.values
+                            Rectangle {
+                                width: stateText.width
+                                height: stateText.height
+                                anchors.margins:10
+                                border.width: 1
+                                Text {
+                                    id: stateText
+                                    anchors.centerIn: parent
+                                    text: modelData
                                 }
                             }
                         }

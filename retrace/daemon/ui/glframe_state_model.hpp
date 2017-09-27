@@ -48,9 +48,8 @@ class QStateValue : public QObject, NoCopy, NoAssign, NoMove {
   Q_OBJECT
 
   Q_PROPERTY(QString name READ name CONSTANT)
-  Q_PROPERTY(QList<QString> values READ values CONSTANT)
-  // Q_PROPERTY(QUniformDimension dimension READ dimension CONSTANT)
-  Q_PROPERTY(QList<QString> choices READ choices CONSTANT)
+  Q_PROPERTY(QList<QVariant> values READ values CONSTANT)
+  Q_PROPERTY(QList<QVariant> choices READ choices CONSTANT)
 
  public:
   QStateValue() {}
@@ -59,12 +58,12 @@ class QStateValue : public QObject, NoCopy, NoAssign, NoMove {
   void insert(int index, const std::string &value);
 
   QString name() const { return m_name; }
-  QList<QString> values() const { return m_values; }
-  QList<QString> choices() const { return m_choices; }
+  QList<QVariant> values() const { return m_values; }
+  QList<QVariant> choices() const { return m_choices; }
 
  private:
   QString m_name;
-  QList<QString> m_values, m_choices;
+  QList<QVariant> m_values, m_choices;
 };
 
 class QStateModel : public QObject,
