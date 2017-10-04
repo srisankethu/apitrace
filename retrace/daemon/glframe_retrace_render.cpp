@@ -147,6 +147,27 @@ class RetraceRender::UniformOverride {
   std::map<UniformKey, std::string> m_uniform_overrides;
 };
 
+void state_name_to_enum(const std::string &value) {
+  CULL_FACE = 0x0B44,
+  CULL_FACE_MODE = 0x0B45,
+
+}
+
+class RetraceRender::StateOverride {
+ public:
+  RetraceRender() {};
+  void setState(const StateKey &item,
+                const std::string &value) {
+    m_overrides[item] = state_name_to_enum(value);
+  }
+ private:
+  struct Key {
+    uint32_t item;
+    uint32_t offset;
+  }
+    std::map<StateKey, uint32_t> m_overrides;
+};
+
 RetraceRender::RetraceRender(trace::AbstractParser *parser,
                              retrace::Retracer *retracer,
                              StateTrack *tracker) : m_parser(parser),
@@ -467,4 +488,10 @@ RetraceRender::onState(SelectionId selId,
       }
     }
   }
+}
+
+void
+RetraceRender::setState(const RenderSelection &selection,
+                        const StateKey &item,
+                        const std::string &value) {
 }

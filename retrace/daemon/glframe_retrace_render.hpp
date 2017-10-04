@@ -92,6 +92,10 @@ class RetraceRender {
                ExperimentId experimentCount,
                RenderId renderId,
                OnFrameRetrace *callback);
+  void setState(const RenderSelection &selection,
+                const StateKey &item,
+                const std::string &value);
+
   static bool isRender(const trace::Call &c);
   static bool changesContext(const trace::Call &c);
   static bool endsFrame(const trace::Call &c);
@@ -116,6 +120,8 @@ class RetraceRender {
   bool m_disabled, m_simple_shader;
   class UniformOverride;
   UniformOverride *m_uniform_override;
+  class StateOverride;
+  StateOverride *m_state_override;
 };
 
 }  // namespace glretrace

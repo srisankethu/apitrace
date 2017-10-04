@@ -480,7 +480,7 @@ void
 RetraceContext::setUniform(const RenderSelection &selection,
                            const std::string &name, int index,
                            const std::string &data) {
-  for (auto r : m_renders)
+  for (auto r : m_renders) 
     if (isSelected(r.first, selection))
       r.second->setUniform(name, index, data);
 }
@@ -494,5 +494,15 @@ RetraceContext::retraceState(const RenderSelection &selection,
     r.second->retrace(tracker);
     if (isSelected(r.first, selection))
       r.second->onState(selection.id, experimentCount, r.first, callback);
+  }
+}
+
+void
+RetraceContext::setState(const RenderSelection &selection,
+                         const StateKey &item,
+                         const std::string &value) {
+  for (auto r : m_renders) {
+    if (isSelected(r.first, selection))
+      r.second->setState(item, value);
   }
 }
