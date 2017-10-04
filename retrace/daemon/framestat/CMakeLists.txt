@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
 include_directories (
+  ..
   )
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -15,6 +16,18 @@ set (FRAMESTAT_SRC
 
 add_executable(framestat
   ${FRAMESTAT_SRC}
+)
+
+set (FRAMEPERF_SRC
+  frameperf.cpp
+  perfplayer.hpp
+  perfplayer.cpp
+  perfmetrics.cpp
+  perfmetrics.hpp
+  )
+
+add_executable(frameperf
+  ${FRAMEPERF_SRC}
 )
 
 if (WIN32)
@@ -33,10 +46,21 @@ target_link_libraries(framestat
   ${GL_LIB}
   ${X11_X11_LIB}
   ${THREAD_LIB}
-)
+  )
+
+target_link_libraries(frameperf
+  retrace_daemon
+  retrace_gldispatch
+  glretrace_common
+  glhelpers
+  glproc_gl
+  ${GL_LIB}
+  ${X11_X11_LIB}
+  ${THREAD_LIB}
+  )
 
 install (TARGETS framestat RUNTIME DESTINATION bin) 
 
 if (NOT WIN32)
-  Lint(FRAMESTAT_SRC)
+  Lint(FRAMESTAT_SRC FRAMEPERF_SRC)
 endif()

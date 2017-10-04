@@ -1,4 +1,4 @@
-// Copyright (C) Intel Corp.  2015.  All Rights Reserved.
+// Copyright (C) Intel Corp.  2017.  All Rights Reserved.
 
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -25,55 +25,36 @@
 //  *   Mark Janes <mark.a.janes@intel.com>
 //  **********************************************************************/
 
-#ifndef _GLFRAME_METRICS_HPP_
-#define _GLFRAME_METRICS_HPP_
+#ifndef _PERFMETRICS_HPP_
+#define _PERFMETRICS_HPP_
 
-#include <map>
+#include <string>
 #include <vector>
 
 #include "glframe_traits.hpp"
-#include "glframe_retrace_interface.hpp"
 
 namespace glretrace {
 
-class PerfMetricsContext;
-class Context;
-
-class PerfMetrics {
+class FrameMetricsCallback {
  public:
-  // Constructor accepts OnFrameRetrace callback pointer, and calls
-  // onMetricList before returning.
-  static PerfMetrics *Create(OnFrameRetrace *callback);
-  virtual ~PerfMetrics() {}
+  virtual void onMetricList(const std::vector<std::string> &names) = 0;
+  virtual void onMetrics(int frame,
+                         const std::vector<float> &data) = 0;
+};
 
-  // Indicates the number of passes a metrics retrace must make to
-  // collect the full metric set
-  virtual int groupCount() const = 0;
-
-  // Subsequent begin/end will collect data for all counters in the group
-  virtual void selectGroup(int index) = 0;
-
-  // Subsequent begin/end will collect data for the metric associated
-  // with the id
-  virtual void selectMetric(MetricId metric) = 0;
-
-  // Begin collection for selected metrics.  When reported, the
-  // counter values will be associated with the specified render.
-  virtual void begin(RenderId render) = 0;
-
-  // End collection for the selected metrics.
-  virtual void end() = 0;
-
-  // Flush and call onMetrics, providing all queried metric data.
-  virtual void publish(ExperimentId experimentCount,
-               SelectionId selectionCount,
-               OnFrameRetrace *callback) = 0;
-
-  // Call before changing to another context
-  virtual void endContext() = 0;
-  virtual void beginContext() = 0;
+class FrameMetrics : NoCopy, NoAssign {
+ public:
+  explicit FrameMetrics(FrameMetricsCallback *cb);
+  ~FrameMetrics();
+  int groupCount() const;
+  void selectGroup(int index);
+  void begin(int frame);
+  void end();
+  void publish(FrameMetricsCallback *callback, bool flush=false);
+ private:
+  int m_current_group;
 };
 
 }  // namespace glretrace
 
-#endif /* _GLFRAME_METRICS_HPP__ */
+#endif /* _PERFMETRICS_HPP_ */
