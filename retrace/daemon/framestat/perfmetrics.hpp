@@ -42,6 +42,7 @@ class FrameMetricsCallback {
                          const std::vector<float> &data) = 0;
 };
 
+class PerfMetricGroup;
 class FrameMetrics : NoCopy, NoAssign {
  public:
   explicit FrameMetrics(FrameMetricsCallback *cb);
@@ -49,10 +50,12 @@ class FrameMetrics : NoCopy, NoAssign {
   int groupCount() const;
   void selectGroup(int index);
   void begin(int frame);
-  void end();
-  void publish(FrameMetricsCallback *callback, bool flush=false);
+  void end(int frame);
+  void publish(bool flush=false);
  private:
+  FrameMetricsCallback *m_cb;
   int m_current_group;
+  std::vector<PerfMetricGroup *> groups;
 };
 
 }  // namespace glretrace

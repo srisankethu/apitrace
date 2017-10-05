@@ -65,5 +65,6 @@ int main(int argc, char *argv[]) {
   }
   glretrace::GlFunctions::Init();
   PerfPlayer p(frame_file);
+  p.play();
   return 0;
 }

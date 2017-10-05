@@ -152,15 +152,15 @@ PerfMetricGroup::publish(FrameMetricsCallback *callback, bool flush) {
                                         GL_PERFQUERY_DONOT_FLUSH_INTEL),
                                        m_data_size, m_data_buf.data(),
                                        &bytes_written);
-    if (bytes_written == 0)
-      return;
-    assert(bytes_written == m_data_size);
-    finished_frames.push_back(extant_query.first);
+    if (bytes_written > 0) {
+      assert(bytes_written == m_data_size);
+      finished_frames.push_back(extant_query.first);
     
-    for (auto desired_metric : m_metrics)
-      metric_data.push_back(desired_metric->getMetric(m_data_buf));
+      for (auto desired_metric : m_metrics)
+        metric_data.push_back(desired_metric->getMetric(m_data_buf));
 
-    callback->onMetrics(extant_query.first, metric_data);
+      callback->onMetrics(extant_query.first, metric_data);
+    }
   }
   for (auto frame : finished_frames) {
     GlFunctions::DeletePerfQueryINTEL(m_extant_query_handles[frame]);
@@ -232,17 +232,66 @@ PerfMetric::getMetric(const std::vector<unsigned char> &data) const {
   return fval;
 }
 
-FrameMetrics::FrameMetrics(FrameMetricsCallback *cb) {}
+FrameMetrics::FrameMetrics(FrameMetricsCallback *cb)
+    : m_cb(cb) {
+  GLuint query_id;
+  GLint count;
+  bool has_metrics = false;
+  GlFunctions::GetIntegerv(GL_NUM_EXTENSIONS, &count);
+  for (int i = 0; i < count; ++i) {
+    const GLubyte *name = GlFunctions::GetStringi(GL_EXTENSIONS, i);
+    if (strcmp((const char*)name, "GL_INTEL_performance_query") == 0)
+      has_metrics = true;
+  }
+  assert(has_metrics);
+  GlFunctions::GetFirstPerfQueryIdINTEL(&query_id);
+  if (query_id == GLuint(-1))
+    return;
+
+  if (query_id == 0)
+    return;
+  std::vector<unsigned int> query_ids;
+  query_ids.push_back(query_id);
+
+  while (true) {
+    GlFunctions::GetNextPerfQueryIdINTEL(query_id, &query_id);
+    if (!query_id)
+      break;
+    query_ids.push_back(query_id);
+  }
+  for (auto i : query_ids) {
+    PerfMetricGroup *g = new PerfMetricGroup(i);
+    if (g->name() == "Compute Metrics Extended Gen9") {
+      // SKL metrics bug.  Queries on this group crash.
+      delete g;
+      continue;
+    }
+
+    groups.push_back(g);
+  }
+}
+
 FrameMetrics::~FrameMetrics() {}
 int
 FrameMetrics::groupCount() const { return 0; }
 void
-FrameMetrics::selectGroup(int index) {}
+FrameMetrics::selectGroup(int index) {
+  m_current_group = index;
+  groups[index]->activate(m_cb);
+}
+
 void
-FrameMetrics::begin(int frame) {}
+FrameMetrics::begin(int frame) {
+  groups[m_current_group]->begin(frame);
+}
 void
-FrameMetrics::end() {}
+FrameMetrics::end(int frame) {
+  groups[m_current_group]->end(frame);
+}
+
 void
-FrameMetrics::publish(FrameMetricsCallback *callback, bool flush) {}
+FrameMetrics::publish(bool flush) {
+  groups[m_current_group]->publish(m_cb, flush);
+}
 
 

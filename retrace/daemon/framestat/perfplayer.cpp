@@ -42,9 +42,19 @@ using retrace::parser;
 extern retrace::Retracer retracer;
 
 class PerfCallback : public FrameMetricsCallback {
-  void onMetricList(const std::vector<std::string> &names) {}
+  void onMetricList(const std::vector<std::string> &names) {
+    printf("frame");
+    for (auto n : names)
+      printf("\t%s", n.c_str());
+    printf("\n");
+  }
   void onMetrics(int frame,
-                 const std::vector<float> &data) {}
+                 const std::vector<float> &data) {
+    printf("%d", frame);
+    for (auto d : data)
+      printf("\t%f", d);
+    printf("\n");
+  }
 };
 
 PerfPlayer::PerfPlayer(const std::string &trace) {
@@ -69,15 +79,27 @@ PerfPlayer::PerfPlayer(const std::string &trace) {
     if (frame_boundary)
       break;
   }
-   m_cb = new PerfCallback;
+  m_cb = new PerfCallback;
   m_metrics = new FrameMetrics(m_cb);
   m_metrics->selectGroup(1);
-  m_metrics->begin(0);
-  m_metrics->end();
-  m_metrics->publish(m_cb);
-  printf("frame\t");
-  // for (auto i : m_cb->known_metrics) {
-  //   printf("%s\t", m_cb->metric_names[i].c_str());
-  // }
-  printf("\n");
+}
+
+void
+PerfPlayer::play() {
+  int frame = 1;
+  m_metrics->begin(frame);
+  trace::Call *call;
+  while ((call = parser->parse_call())) {
+    retracer.retrace(*call);
+    const bool frame_boundary = RetraceRender::endsFrame(*call);
+    delete call;
+    if (frame_boundary) {
+      m_metrics->end(frame);
+      m_metrics->publish();
+      ++frame;
+      m_metrics->begin(frame);
+    }
+  }
+  m_metrics->end(frame);
+  m_metrics->publish(true);
 }

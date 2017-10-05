@@ -39,6 +39,7 @@ class FrameMetrics;
 class PerfPlayer {
  public:
   explicit PerfPlayer(const std::string &trace);
+  void play();
  private:
   FrameMetrics *m_metrics;
   PerfCallback *m_cb;
