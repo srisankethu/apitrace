@@ -37,12 +37,15 @@ using glretrace::PerfPlayer;
 
 int main(int argc, char *argv[]) {
   std::string frame_file;
-  const char *usage = "USAGE: frameperf -f {trace_file} \n";
-  int opt;
-  while ((opt = getopt(argc, argv, "f:h")) != -1) {
+  const char *usage = "USAGE: frameperf -g {metrics_group} -f {trace_file} \n";
+  int opt, group=-1;
+  while ((opt = getopt(argc, argv, "g:f:h")) != -1) {
     switch (opt) {
       case 'f':
         frame_file = optarg;
+        continue;
+      case 'g':
+        group = atoi(optarg);
         continue;
       case 'h':
       default: /* '?' */
@@ -55,7 +58,12 @@ int main(int argc, char *argv[]) {
     printf("%s", usage);
     return -1;
   }
-  
+  if (group == -1) {
+    printf("ERROR: -g required\n");
+    printf("%s", usage);
+    return -1;
+  }
+
   if (FILE *file = fopen(frame_file.c_str(), "r")) {
     fclose(file);
   } else {
@@ -64,7 +72,7 @@ int main(int argc, char *argv[]) {
     return -1;
   }
   glretrace::GlFunctions::Init();
-  PerfPlayer p(frame_file);
+  PerfPlayer p(frame_file, group);
   p.play();
   return 0;
 }

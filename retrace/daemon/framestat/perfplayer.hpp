@@ -38,7 +38,7 @@ namespace glretrace {
 class FrameMetrics;
 class PerfPlayer {
  public:
-  explicit PerfPlayer(const std::string &trace);
+  PerfPlayer(const std::string &trace, int group);
   void play();
  private:
   FrameMetrics *m_metrics;

@@ -57,7 +57,7 @@ class PerfCallback : public FrameMetricsCallback {
   }
 };
 
-PerfPlayer::PerfPlayer(const std::string &trace) {
+PerfPlayer::PerfPlayer(const std::string &trace, int group) {
   retrace::debug = 0;
   retrace::verbosity = -1;
   retracer.addCallbacks(glretrace::gl_callbacks);
@@ -81,7 +81,7 @@ PerfPlayer::PerfPlayer(const std::string &trace) {
   }
   m_cb = new PerfCallback;
   m_metrics = new FrameMetrics(m_cb);
-  m_metrics->selectGroup(1);
+  m_metrics->selectGroup(group);
 }
 
 void
