@@ -480,7 +480,7 @@ void
 RetraceContext::setUniform(const RenderSelection &selection,
                            const std::string &name, int index,
                            const std::string &data) {
-  for (auto r : m_renders) 
+  for (auto r : m_renders)
     if (isSelected(r.first, selection))
       r.second->setUniform(name, index, data);
 }

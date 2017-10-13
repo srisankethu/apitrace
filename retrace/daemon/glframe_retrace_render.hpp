@@ -92,8 +92,7 @@ class RetraceRender {
                ExperimentId experimentCount,
                RenderId renderId,
                OnFrameRetrace *callback);
-  void setState(const RenderSelection &selection,
-                const StateKey &item,
+  void setState(const StateKey &item,
                 const std::string &value);
 
   static bool isRender(const trace::Call &c);

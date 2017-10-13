@@ -272,6 +272,13 @@ struct StateKey {
 
   StateKey() : name(INVALID_NAME), index(0) {}
   StateKey(StateItem n, int i) : name(n), index(i) {}
+  bool operator<(const StateKey &o) const {
+    if (name < o.name)
+      return true;
+    if (name > o.name)
+      return false;
+    return index < o.index;
+  }
 };
 
 class OnFrameRetrace {

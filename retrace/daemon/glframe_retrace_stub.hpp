@@ -97,7 +97,7 @@ class FrameRetraceStub : public IFrameRetrace {
                             ExperimentId experimentCount,
                             OnFrameRetrace *callback);
   virtual void setState(const RenderSelection &selection,
-                        StateKey item,
+                        const StateKey &item,
                         const std::string &value);
 
  private:

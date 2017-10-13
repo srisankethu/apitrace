@@ -1319,7 +1319,7 @@ FrameRetraceStub::retraceState(const RenderSelection &selection,
 
 void
 FrameRetraceStub::setState(const RenderSelection &selection,
-                           StateKey item,
+                           const StateKey &item,
                            const std::string &value) {
   m_thread->push(new SetStateRequest(selection, item, value));
 }
