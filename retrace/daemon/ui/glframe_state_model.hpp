@@ -66,6 +66,7 @@ class QStateValue : public QObject, NoCopy, NoAssign, NoMove {
   QList<QVariant> m_values, m_choices;
 };
 
+ TODO: implement multiple selection!
 class QStateModel : public QObject,
                     NoCopy, NoAssign, NoMove {
   Q_OBJECT
