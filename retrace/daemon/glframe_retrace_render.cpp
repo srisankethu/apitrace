@@ -50,6 +50,8 @@ using glretrace::StateTrack;
 using glretrace::RenderTargetType;
 using glretrace::RenderId;
 using glretrace::OnFrameRetrace;
+using glretrace::CULL_FACE;
+using glretrace::CULL_FACE_MODE;
 
 static const std::string simple_fs =
     "void main(void) {\n"
@@ -149,10 +151,19 @@ class RetraceRender::UniformOverride {
 
 uint32_t state_name_to_enum(const std::string &value) {
   static const std::map<std::string, uint32_t> names {
-    {"CULL_FACE", 0x0B44},
-    {"CULL_FACE_MODE", 0x0B45}
+    {"CULL_FACE", CULL_FACE},
+    {"CULL_FACE_MODE", CULL_FACE_MODE}
   };
   return names.find(value)->second;
+}
+
+uint32_t value_to_int(const std::string &value) {
+  static const std::map<std::string, uint32_t> lookup = {
+    {"GL_FRONT", GL_FRONT},
+    {"GL_BACK", GL_BACK},
+    {"GL_FRONT_AND_BACK", GL_FRONT_AND_BACK},
+  };
+  return lookup.find(value)->second;
 }
 
 class RetraceRender::StateOverride {
@@ -160,27 +171,100 @@ class RetraceRender::StateOverride {
   StateOverride() {}
   void setState(const StateKey &item,
                 const std::string &value) {
-    m_overrides[item] = state_name_to_enum(value);
+    m_overrides[Key(state_name_to_enum(value),
+                    static_cast<uint32_t>(item.index))] = value_to_int(value);
   }
+  void saveState();
+  void overrideState() const;
+  void restoreState() const;
+
  private:
   struct Key {
     uint32_t item;
     uint32_t offset;
+    Key(uint32_t i, uint32_t o) : item(i), offset(o) {}
+    bool operator<(const Key &o) const {
+      if (item < o.item)
+        return true;
+      if (item > o.item)
+        return false;
+      return offset < o.offset;
+    }
   };
-  std::map<StateKey, uint32_t> m_overrides;
+  typedef std::map<Key, uint32_t> KeyMap;
+  void enact_state(const KeyMap &m) const;
+  KeyMap m_overrides;
+  KeyMap m_saved_state;
 };
+
+void
+RetraceRender::StateOverride::saveState() {
+  for (auto i : m_overrides) {
+    if (m_saved_state.find(i.first) != m_saved_state.end())
+      continue;
+    switch (i.first.item) {
+      case CULL_FACE:
+        assert(GL::GetError() == GL_NO_ERROR);
+        m_saved_state[i.first] = GlFunctions::IsEnabled(GL_CULL_FACE);
+        assert(GL::GetError() == GL_NO_ERROR);
+        break;
+      case CULL_FACE_MODE: {
+        assert(GL::GetError() == GL_NO_ERROR);
+        GLint cull;
+        GlFunctions::GetIntegerv(GL_CULL_FACE_MODE, &cull);
+        assert(GL::GetError() == GL_NO_ERROR);
+        m_saved_state[i.first] = cull;
+        break;
+      }
+    }
+  }
+}
+
+void
+RetraceRender::StateOverride::overrideState() const {
+  enact_state(m_overrides);
+}
+
+void
+RetraceRender::StateOverride::restoreState() const {
+  enact_state(m_saved_state);
+}
+
+void
+RetraceRender::StateOverride::enact_state(const KeyMap &m) const {
+  for (auto i : m) {
+    switch (i.first.item) {
+      case CULL_FACE:
+        assert(GL::GetError() == GL_NO_ERROR);
+        if (i.second)
+          GlFunctions::Enable(GL_CULL_FACE);
+        else
+          GlFunctions::Disable(GL_CULL_FACE);
+        assert(GL::GetError() == GL_NO_ERROR);
+        break;
+      case CULL_FACE_MODE: {
+        assert(GL::GetError() == GL_NO_ERROR);
+        GlFunctions::CullFace(i.second);
+        assert(GL::GetError() == GL_NO_ERROR);
+        break;
+      }
+    }
+  }
+}
 
 RetraceRender::RetraceRender(trace::AbstractParser *parser,
                              retrace::Retracer *retracer,
-                             StateTrack *tracker) : m_parser(parser),
-                                                    m_retracer(retracer),
-                                                    m_rt_program(-1),
-                                                    m_retrace_program(-1),
-                                                    m_end_of_frame(false),
-                                                    m_highlight_rt(false),
-                                                    m_changes_context(false),
-                                                    m_disabled(false),
-                                                    m_simple_shader(false) {
+                             StateTrack *tracker)
+    : m_parser(parser),
+      m_retracer(retracer),
+      m_rt_program(-1),
+      m_retrace_program(-1),
+      m_end_of_frame(false),
+      m_highlight_rt(false),
+      m_changes_context(false),
+      m_disabled(false),
+      m_simple_shader(false),
+      m_state_override(new StateOverride()) {
   m_parser->getBookmark(m_bookmark.start);
   trace::Call *call = NULL;
   std::stringstream call_stream;
@@ -243,6 +327,7 @@ RetraceRender::RetraceRender(trace::AbstractParser *parser,
 
 RetraceRender::~RetraceRender() {
   delete m_uniform_override;
+  delete m_state_override;
 }
 
 void
@@ -281,6 +366,8 @@ RetraceRender::retraceRenderTarget(const StateTrack &tracker,
   }
 
   m_uniform_override->overrideUniforms();
+  m_state_override->saveState();
+  m_state_override->overrideState();
 
   // retrace the final render
   trace::Call *call = m_parser->parse_call();
@@ -290,6 +377,7 @@ RetraceRender::retraceRenderTarget(const StateTrack &tracker,
   delete(call);
 
   m_uniform_override->restoreUniforms();
+  m_state_override->restoreState();
 
   if (blend_enabled)
     GlFunctions::Enable(GL_BLEND);
@@ -321,9 +409,11 @@ RetraceRender::retrace(StateTrack *tracker) const {
 
   // select the shader override if necessary
   if (m_simple_shader) {
+    assert(false);
     StateTrack::useProgramGL(m_rt_program);
     tracker->useProgram(m_rt_program);
   } else if (m_retrace_program > -1) {
+    assert(false);
     StateTrack::useProgramGL(m_retrace_program);
     if (tracker) {
       tracker->useProgram(m_retrace_program);
@@ -371,6 +461,8 @@ RetraceRender::retrace(const StateTrack &tracker,
   }
 
   m_uniform_override->overrideUniforms();
+  m_state_override->saveState();
+  m_state_override->overrideState();
 
   // retrace the final render
   trace::Call *call = m_parser->parse_call();
@@ -385,6 +477,7 @@ RetraceRender::retrace(const StateTrack &tracker,
                 callback->render, callback->callback);
   }
 
+  m_state_override->restoreState();
   m_uniform_override->restoreUniforms();
 
   StateTrack::useProgramGL(m_original_program);
@@ -449,8 +542,8 @@ RetraceRender::setUniform(const std::string &name, int index,
   m_uniform_override->setUniform(name, index, data);
 }
 
-std::string cull_to_string(GLint cull) {
-  switch (cull) {
+std::string value_to_string(GLint value) {
+  switch (value) {
     case GL_FRONT:
       return std::string("GL_FRONT");
     case GL_BACK:
@@ -483,7 +576,7 @@ RetraceRender::onState(SelectionId selId,
     GlFunctions::GetIntegerv(GL_CULL_FACE_MODE, &cull);
     GLenum e = GL::GetError();
     if (e == GL_NO_ERROR) {
-      const std::string cull_str = cull_to_string(cull);
+      const std::string cull_str = value_to_string(cull);
       if (cull_str.size() > 0) {
         callback->onState(selId, experimentCount, renderId,
                           StateKey(CULL_FACE_MODE, 0), cull_str);
@@ -495,5 +588,5 @@ RetraceRender::onState(SelectionId selId,
 void
 RetraceRender::setState(const StateKey &item,
                         const std::string &value) {
-  // TODO(majanes)
+  m_state_override->setState(item, value);
 }
