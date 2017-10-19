@@ -466,9 +466,9 @@ RetraceContext::retraceUniform(const RenderSelection &selection,
   for (auto r : m_renders) {
     if (isSelected(r.first, selection)) {
       // pass down the context that is needed to make the uniform callback
-      const RetraceRender::UniformCallbackContext c(selection.id,
-                                                    experimentCount,
-                                                    r.first, callback);
+      const RetraceRender::CallbackContext c(selection.id,
+                                             experimentCount,
+                                             r.first, callback);
       r.second->retrace(tracker, &c);
     } else {
       r.second->retrace(tracker);
@@ -491,9 +491,14 @@ RetraceContext::retraceState(const RenderSelection &selection,
                              const StateTrack &tracker,
                              OnFrameRetrace *callback) {
   for (auto r : m_renders) {
-    r.second->retrace(tracker);
-    if (isSelected(r.first, selection))
-      r.second->onState(selection.id, experimentCount, r.first, callback);
+    if (isSelected(r.first, selection)) {
+      const RetraceRender::CallbackContext c(selection.id,
+                                             experimentCount,
+                                             r.first, callback);
+      r.second->retrace(tracker, NULL, &c);
+    } else {
+      r.second->retrace(tracker);
+    }
   }
 }
 

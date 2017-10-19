@@ -93,6 +93,7 @@ class RenderId {
   bool operator>=(const RenderId &o) const { return value >= o.value; }
   bool operator<=(const RenderId &o) const { return value <= o.value; }
   bool operator==(const RenderId &o) const { return value == o.value; }
+  bool operator!=(const RenderId &o) const { return value != o.value; }
   static const uint32_t INVALID_RENDER = (-1 & ~ID_PREFIX_MASK);
 
  private:

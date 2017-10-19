@@ -1033,6 +1033,7 @@ class SetStateRequest : public IRetraceRequest {
     auto selection = req->mutable_selection();
     makeRenderSelection(m_selection, selection);
     req->set_value(m_value);
+    sock->request(msg);
   }
  private:
   const RenderSelection m_selection;

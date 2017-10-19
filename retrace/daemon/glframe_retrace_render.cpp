@@ -52,6 +52,7 @@ using glretrace::RenderId;
 using glretrace::OnFrameRetrace;
 using glretrace::CULL_FACE;
 using glretrace::CULL_FACE_MODE;
+using glretrace::state_name_to_enum;
 
 static const std::string simple_fs =
     "void main(void) {\n"
@@ -149,7 +150,8 @@ class RetraceRender::UniformOverride {
   std::map<UniformKey, std::string> m_uniform_overrides;
 };
 
-uint32_t state_name_to_enum(const std::string &value) {
+uint32_t
+glretrace::state_name_to_enum(const std::string &value) {
   static const std::map<std::string, uint32_t> names {
     {"CULL_FACE", CULL_FACE},
     {"CULL_FACE_MODE", CULL_FACE_MODE}
@@ -162,6 +164,8 @@ uint32_t value_to_int(const std::string &value) {
     {"GL_FRONT", GL_FRONT},
     {"GL_BACK", GL_BACK},
     {"GL_FRONT_AND_BACK", GL_FRONT_AND_BACK},
+    {"true", 1},
+    {"false", 0}
   };
   return lookup.find(value)->second;
 }
@@ -171,8 +175,7 @@ class RetraceRender::StateOverride {
   StateOverride() {}
   void setState(const StateKey &item,
                 const std::string &value) {
-    m_overrides[Key(state_name_to_enum(value),
-                    static_cast<uint32_t>(item.index))] = value_to_int(value);
+    m_overrides[item] = value_to_int(value);
   }
   void saveState();
   void overrideState() const;
@@ -191,7 +194,7 @@ class RetraceRender::StateOverride {
       return offset < o.offset;
     }
   };
-  typedef std::map<Key, uint32_t> KeyMap;
+  typedef std::map<StateKey, uint32_t> KeyMap;
   void enact_state(const KeyMap &m) const;
   KeyMap m_overrides;
   KeyMap m_saved_state;
@@ -202,7 +205,7 @@ RetraceRender::StateOverride::saveState() {
   for (auto i : m_overrides) {
     if (m_saved_state.find(i.first) != m_saved_state.end())
       continue;
-    switch (i.first.item) {
+    switch (i.first.name) {
       case CULL_FACE:
         assert(GL::GetError() == GL_NO_ERROR);
         m_saved_state[i.first] = GlFunctions::IsEnabled(GL_CULL_FACE);
@@ -216,6 +219,9 @@ RetraceRender::StateOverride::saveState() {
         m_saved_state[i.first] = cull;
         break;
       }
+      case INVALID_NAME:
+        assert(false);
+        break;
     }
   }
 }
@@ -233,7 +239,7 @@ RetraceRender::StateOverride::restoreState() const {
 void
 RetraceRender::StateOverride::enact_state(const KeyMap &m) const {
   for (auto i : m) {
-    switch (i.first.item) {
+    switch (i.first.name) {
       case CULL_FACE:
         assert(GL::GetError() == GL_NO_ERROR);
         if (i.second)
@@ -248,6 +254,9 @@ RetraceRender::StateOverride::enact_state(const KeyMap &m) const {
         assert(GL::GetError() == GL_NO_ERROR);
         break;
       }
+      case INVALID_NAME:
+        assert(false);
+        break;
     }
   }
 }
@@ -433,7 +442,8 @@ RetraceRender::retrace(StateTrack *tracker) const {
 
 void
 RetraceRender::retrace(const StateTrack &tracker,
-                       const UniformCallbackContext *callback) const {
+                       const CallbackContext *uniform_context,
+                       const CallbackContext *state_context) const {
   // check that the parser is in correct state
   trace::ParseBookmark bm;
   m_parser->getBookmark(bm);
@@ -471,10 +481,15 @@ RetraceRender::retrace(const StateTrack &tracker,
     m_retracer->retrace(*call);
   delete(call);
 
-  if (callback) {
+  if (uniform_context) {
     Uniforms u;
-    u.onUniform(callback->selection, callback->experiment,
-                callback->render, callback->callback);
+    u.onUniform(uniform_context->selection, uniform_context->experiment,
+                uniform_context->render, uniform_context->callback);
+  }
+
+  if (state_context) {
+    onState(state_context->selection, state_context->experiment,
+            state_context->render, state_context->callback);
   }
 
   m_state_override->restoreState();
@@ -559,7 +574,7 @@ void
 RetraceRender::onState(SelectionId selId,
                        ExperimentId experimentCount,
                        RenderId renderId,
-                       OnFrameRetrace *callback) {
+                       OnFrameRetrace *callback) const {
   {
     GL::GetError();
     GLboolean cull_enabled = GlFunctions::IsEnabled(GL_CULL_FACE);
