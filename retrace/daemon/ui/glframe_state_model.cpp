@@ -28,6 +28,7 @@
 #include "glframe_state_model.hpp"
 #include <GL/gl.h>
 
+#include <algorithm>
 #include <string>
 #include <vector>
 
@@ -42,12 +43,19 @@ using glretrace::state_name_to_enum;
 static const int kUninitializedValue = -2;
 static const int kMixedValue = -1;
 
-QStateValue::QStateValue(const std::string &_name,
+QStateValue::QStateValue(const std::string &_group,
+                         const std::string &_path,
+                         const std::string &_name,
                          const std::vector<std::string> &_choices)
-    : m_name(_name.c_str()),
+    : m_group(_group.c_str()),
+      m_path(_path.c_str()),
+      m_name(_name.c_str()),
       m_value(kUninitializedValue) {
   for (auto c : _choices)
     m_choices.append(QVariant(c.c_str()));
+  m_indent = static_cast<int>(std::count(_path.begin(), _path.end(), '/'));
+  if (_name.length() == 0)
+    m_name = _path.substr(_path.find_last_of("/") + 1).c_str();
 }
 
 void
@@ -114,10 +122,12 @@ QStateModel::clear() {
   emit stateChanged();
   {
     ScopedLock s(m_protect);
-    for (auto i : m_state_by_name)
-      delete i.second;
     m_state_by_name.clear();
     m_renders.clear();
+    m_known_paths.clear();
+    for (auto i : m_for_deletion)
+      delete i;
+    m_for_deletion.clear();
   }
 }
 
@@ -127,13 +137,7 @@ void QStateModel::onState(SelectionId selectionCount,
                           StateKey item,
                           const std::string &value) {
   if (selectionCount == SelectionId(SelectionId::INVALID_SELECTION)) {
-    {
-      ScopedLock s(m_protect);
-      m_states.clear();
-      for (auto i : m_state_by_name)
-        m_states.push_back(i.second);
-    }
-    emit stateChanged();
+    refresh();
     return;
   }
 
@@ -152,19 +156,42 @@ void QStateModel::onState(SelectionId selectionCount,
   }
   if (m_renders.empty() || renderId != m_renders.back())
     m_renders.push_back(renderId);
+  std::string path_comp = item.path;
+  while (path_comp.length() > 0) {
+    auto known = m_known_paths.find(path_comp);
+    if (known == m_known_paths.end()) {
+      // create an empty item to serve as the directory
+      QStateValue *i = new QStateValue(item.group,
+                                       path_comp,
+                                       "",
+                                       std::vector<std::string>());
+      StateKey k(item.group, path_comp, "");
+      m_state_by_name[k] = i;
+      m_known_paths[item.path] = true;
+    } else {
+      break;
+    }
+    path_comp = path_comp.substr(0, path_comp.find_last_of("/"));
+  }
+
   auto &name = item.name;
-  auto state_value = m_state_by_name.find(name);
+  auto state_value = m_state_by_name.find(item);
   if (state_value == m_state_by_name.end()) {
-    QStateValue *i = new QStateValue(name,
+    QStateValue *i = new QStateValue(item.group,
+                                     item.path,
+                                     name,
                                      name_to_choices(name));
-    m_state_by_name[name] = i;
-    state_value = m_state_by_name.find(name);
+    m_state_by_name[item] = i;
+    state_value = m_state_by_name.find(item);
+    m_for_deletion.push_back(i);
   }
   state_value->second->insert(value);
 }
 
 void
-QStateModel::setState(const QString &name,
+QStateModel::setState(const QString &group,
+                      const QString &path,
+                      const QString &name,
                       const QString &value) {
   RenderSelection sel;
   sel.id = m_sel_count;
@@ -179,8 +206,42 @@ QStateModel::setState(const QString &name,
     ++r;
   }
 
-  StateKey key("", "", name.toStdString());
+  StateKey key(group.toStdString(), path.toStdString(), name.toStdString());
   m_retrace->setState(sel, key, value.toStdString());
   emit stateExperiment();
 }
 
+void
+QStateModel::collapse(const QString &path) {
+  m_filter_paths[path.toStdString()] = true;
+}
+
+void
+QStateModel::expand(const QString &path) {
+  auto i = m_filter_paths.find(path.toStdString());
+  assert(i != m_filter_paths.end());
+  m_filter_paths.erase(i);
+}
+
+void
+QStateModel::refresh() {
+  {
+    ScopedLock s(m_protect);
+    m_states.clear();
+    for (auto i : m_state_by_name) {
+      bool filter = false;
+      for (auto f : m_filter_paths) {
+        if (strncmp(f.first.c_str(), i.first.path.c_str(),
+                    f.first.length()) == 0) {
+          if (i.first.name.length() > 0)
+            // never filter directories
+            filter = true;
+          break;
+        }
+      }
+      if (!filter)
+        m_states.push_back(i.second);
+    }
+  }
+  emit stateChanged();
+}

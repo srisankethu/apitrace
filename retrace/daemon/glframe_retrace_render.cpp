@@ -583,7 +583,7 @@ RetraceRender::onState(SelectionId selId,
     GLenum e = GL::GetError();
     if (e == GL_NO_ERROR) {
       callback->onState(selId, experimentCount, renderId,
-                        StateKey("", "", "CULL_FACE"),
+                        StateKey("Rendering", "Cull State", "CULL_FACE"),
                         cull_enabled ? "true" : "false");
     }
   }
@@ -596,7 +596,8 @@ RetraceRender::onState(SelectionId selId,
       const std::string cull_str = value_to_string(cull);
       if (cull_str.size() > 0) {
         callback->onState(selId, experimentCount, renderId,
-                          StateKey("", "", "CULL_FACE_MODE"), cull_str);
+                          StateKey("Rendering", "Cull State/mode/test/a/path",
+                                   "CULL_FACE_MODE"), cull_str);
       }
     }
   }
