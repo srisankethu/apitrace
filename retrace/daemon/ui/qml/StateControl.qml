@@ -15,6 +15,7 @@ Item {
             delegate: Component {
                 Row {
                     visible: modelData.visible
+                    height: modelData.visible ? combo.height : 0
                     Rectangle {
                         id: indent
                         width: nameText.height * modelData.indent
@@ -23,6 +24,7 @@ Item {
                     }
                     Rectangle {
                         id: collapse
+                        anchors.bottom: nameText.bottom
                         width: nameText.height
                         height: nameText.height
                         visible: modelData.choices.length == 0
@@ -49,6 +51,7 @@ Item {
                         text: modelData.name + " : "
                     }
                     ComboBoxFitContents {
+                        id: combo
                         anchors.verticalCenter: parent.verticalCenter
                         model: modelData.choices
                         currentIndex: modelData.value
