@@ -52,11 +52,16 @@ class QStateValue : public QObject, NoCopy, NoAssign, NoMove {
   Q_PROPERTY(QString name READ name CONSTANT)
   Q_PROPERTY(QVariant value READ value CONSTANT)
   Q_PROPERTY(QVariant indent READ indent CONSTANT)
+  Q_PROPERTY(QVariant visible
+             READ visible
+             WRITE setVisible
+             NOTIFY visibleChanged)
   Q_PROPERTY(QList<QVariant> choices READ choices CONSTANT)
 
  public:
-  QStateValue() {}
-  QStateValue(const std::string &_group,
+  explicit QStateValue(QObject *parent = 0);
+  QStateValue(QObject *parent,
+              const std::string &_group,
               const std::string &_path,
               const std::string &_name,
               const std::vector<std::string> &_choices);
@@ -67,11 +72,16 @@ class QStateValue : public QObject, NoCopy, NoAssign, NoMove {
   QString name() const { return m_name; }
   QVariant value() const { return m_value; }
   QVariant indent() const { return m_indent; }
+  QVariant visible() const { return m_visible; }
+  void setVisible(QVariant v) { m_visible = v; emit visibleChanged(); }
   QList<QVariant> choices() const { return m_choices; }
+
+ signals:
+  void visibleChanged();
 
  private:
   QString m_group, m_path, m_name;
-  QVariant m_value, m_indent;
+  QVariant m_value, m_indent, m_visible;
   QList<QVariant> m_choices;
 };
 

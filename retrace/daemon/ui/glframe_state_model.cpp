@@ -43,14 +43,22 @@ using glretrace::state_name_to_enum;
 static const int kUninitializedValue = -2;
 static const int kMixedValue = -1;
 
-QStateValue::QStateValue(const std::string &_group,
+QStateValue::QStateValue(QObject *parent) {
+  if (parent)
+    moveToThread(parent->thread());
+}
+
+QStateValue::QStateValue(QObject *parent,
+                         const std::string &_group,
                          const std::string &_path,
                          const std::string &_name,
                          const std::vector<std::string> &_choices)
     : m_group(_group.c_str()),
       m_path(_path.c_str()),
       m_name(_name.c_str()),
-      m_value(kUninitializedValue) {
+      m_value(kUninitializedValue),
+      m_visible(true) {
+  moveToThread(parent->thread());
   for (auto c : _choices)
     m_choices.append(QVariant(c.c_str()));
   m_indent = static_cast<int>(std::count(_path.begin(), _path.end(), '/'));
@@ -161,7 +169,8 @@ void QStateModel::onState(SelectionId selectionCount,
     auto known = m_known_paths.find(path_comp);
     if (known == m_known_paths.end()) {
       // create an empty item to serve as the directory
-      QStateValue *i = new QStateValue(item.group,
+      QStateValue *i = new QStateValue(this,
+                                       item.group,
                                        path_comp,
                                        "",
                                        std::vector<std::string>());
@@ -177,7 +186,8 @@ void QStateModel::onState(SelectionId selectionCount,
   auto &name = item.name;
   auto state_value = m_state_by_name.find(item);
   if (state_value == m_state_by_name.end()) {
-    QStateValue *i = new QStateValue(item.group,
+    QStateValue *i = new QStateValue(this,
+                                     item.group,
                                      item.path,
                                      name,
                                      name_to_choices(name));
@@ -213,14 +223,47 @@ QStateModel::setState(const QString &group,
 
 void
 QStateModel::collapse(const QString &path) {
-  m_filter_paths[path.toStdString()] = true;
+  const std::string path_str = path.toStdString();
+  m_filter_paths[path_str] = true;
+  for (auto i : m_state_by_name) {
+    if (!i.second->visible().toBool())
+      continue;
+    if (strncmp(path_str.c_str(), i.first.path.c_str(),
+                path_str.length()) == 0) {
+      // do not filter the collapsed directories themselves
+      if ((i.first.path == path_str) && (i.first.name.length() == 0))
+        continue;
+      i.second->setVisible(false);
+    }
+  }
 }
 
 void
 QStateModel::expand(const QString &path) {
-  auto i = m_filter_paths.find(path.toStdString());
+  const std::string path_str = path.toStdString();
+  auto i = m_filter_paths.find(path_str);
   assert(i != m_filter_paths.end());
   m_filter_paths.erase(i);
+  for (auto i : m_state_by_name) {
+    if (i.second->visible().toBool())
+      continue;
+    if (strncmp(path_str.c_str(), i.first.path.c_str(),
+                path_str.length()) == 0) {
+      // possibly expanded
+      bool visible = true;
+      for (auto f : m_filter_paths) {
+        if (strncmp(f.first.c_str(), i.first.path.c_str(),
+                    f.first.length()) == 0) {
+          // do not filter the collapsed directories themselves
+          if ((i.first.path == f.first) && (i.first.name.length() == 0))
+            visible = true;
+          else
+            visible = false;
+        }
+      }
+      i.second->setVisible(visible);
+    }
+  }
 }
 
 void
@@ -229,18 +272,19 @@ QStateModel::refresh() {
     ScopedLock s(m_protect);
     m_states.clear();
     for (auto i : m_state_by_name) {
-      bool filter = false;
+      bool visible = true;
       for (auto f : m_filter_paths) {
         if (strncmp(f.first.c_str(), i.first.path.c_str(),
                     f.first.length()) == 0) {
-          if (i.first.name.length() > 0)
-            // never filter directories
-            filter = true;
-          break;
+          // do not filter the collapsed directories themselves
+          if ((i.first.path == f.first) && (i.first.name.length() == 0))
+            visible = true;
+          else
+            visible = false;
         }
       }
-      if (!filter)
-        m_states.push_back(i.second);
+      i.second->setVisible(visible);
+      m_states.push_back(i.second);
     }
   }
   emit stateChanged();
