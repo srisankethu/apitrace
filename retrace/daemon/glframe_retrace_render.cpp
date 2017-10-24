@@ -562,7 +562,7 @@ RetraceRender::onState(SelectionId selId,
       const std::string cull_str = state_enum_to_name(cull);
       if (cull_str.size() > 0) {
         callback->onState(selId, experimentCount, renderId,
-                          StateKey("Rendering", "Cull State/mode/test/a/path",
+                          StateKey("Rendering", "Cull State",
                                    "CULL_FACE_MODE"), cull_str);
       }
     }
