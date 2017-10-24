@@ -35,6 +35,7 @@
 #include "glframe_logger.hpp"
 #include "glframe_os.hpp"
 #include "glframe_retrace_render.hpp"
+#include "glframe_state_enums.hpp"
 
 using glretrace::QStateModel;
 using glretrace::QStateValue;
