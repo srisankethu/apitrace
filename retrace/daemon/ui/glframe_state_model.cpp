@@ -58,7 +58,8 @@ QStateValue::QStateValue(QObject *parent,
       m_path(_path.c_str()),
       m_name(_name.c_str()),
       m_value(kUninitializedValue),
-      m_visible(true) {
+      m_visible(true),
+      m_type(QStateValue::KglDirectory) {
   moveToThread(parent->thread());
   for (auto c : _choices)
     m_choices.append(QVariant(c.c_str()));
@@ -69,6 +70,7 @@ QStateValue::QStateValue(QObject *parent,
 
 void
 QStateValue::insert(const std::string &value) {
+  m_type = QStateValue::KglEnum;
   int value_index = 0;
   QVariant qvalue(value.c_str());
   for (auto c : m_choices) {
@@ -80,7 +82,7 @@ QStateValue::insert(const std::string &value) {
   assert(value_index < m_choices.size());
 
   if (m_value == kUninitializedValue) {
-    // selected renders have different values
+    // first render, display the value
     m_value = value_index;
     return;
   }
@@ -88,6 +90,32 @@ QStateValue::insert(const std::string &value) {
   if (m_value != value_index)
     // selected renders have different values
     m_value = kMixedValue;
+}
+
+void
+QStateValue::insert(const std::string &red,
+                    const std::string &blue,
+                    const std::string &green,
+                    const std::string &alpha) {
+  m_type = QStateValue::KglColor;
+  QStringList color;
+  color.append(QString::fromStdString(red));
+  color.append(QString::fromStdString(blue));
+  color.append(QString::fromStdString(green));
+  color.append(QString::fromStdString(alpha));
+
+  if (m_value == kUninitializedValue) {
+    // selected renders have different values
+    m_value = color;
+    return;
+  }
+
+  if (m_value != color) {
+    // selected renders have different values
+    for (auto c : color)
+      c = "###";
+    m_value = color;
+  }
 }
 
 QStateModel::QStateModel() {}
@@ -131,7 +159,7 @@ void QStateModel::onState(SelectionId selectionCount,
                           ExperimentId experimentCount,
                           RenderId renderId,
                           StateKey item,
-                          const std::string &value) {
+                          const std::vector<std::string> &value) {
   if (selectionCount == SelectionId(SelectionId::INVALID_SELECTION)) {
     refresh();
     return;
@@ -183,7 +211,16 @@ void QStateModel::onState(SelectionId selectionCount,
     state_value = m_state_by_name.find(item);
     m_for_deletion.push_back(i);
   }
-  state_value->second->insert(value);
+  if (value.size() == 1) {
+    state_value->second->insert(value[0]);
+    return;
+  }
+  if (value.size() == 4) {
+    // color value
+    state_value->second->insert(value[0], value[1], value[2], value[3]);
+    return;
+  }
+  assert(false);
 }
 
 void
@@ -205,7 +242,7 @@ QStateModel::setState(const QString &group,
   }
 
   StateKey key(group.toStdString(), path.toStdString(), name.toStdString());
-  m_retrace->setState(sel, key, value.toStdString());
+  m_retrace->setState(sel, key, {value.toStdString()});
   emit stateExperiment();
 }
 
