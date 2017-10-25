@@ -155,8 +155,6 @@ class RetraceRender::StateOverride {
   StateOverride() {}
   void setState(const StateKey &item,
                 const std::vector<float> &value);
-  // void setState(const StateKey &item,
-  //               bool value);
   void setState(const StateKey &item,
                 GLint value);
   void saveState();
@@ -177,6 +175,7 @@ class RetraceRender::StateOverride {
     }
   };
   enum Type {
+    kUnknown,
     kBool,
     kFloat,
     kEnum
@@ -210,6 +209,7 @@ RetraceRender::StateOverride::setState(const StateKey &item,
 void
 RetraceRender::StateOverride::setState(const StateKey &item,
                                        const std::vector<float> &value) {
+  m_data_types[item] = kFloat;
   auto &i = m_overrides[item];
   if (i.empty())
     i.resize(value.size());
@@ -227,6 +227,8 @@ RetraceRender::StateOverride::setState(const StateKey &item,
 
 void
 RetraceRender::StateOverride::save_enabled_state(const StateKey &k, GLint v) {
+  if (m_data_types[k] == kUnknown)
+    m_data_types[k] = kBool;
   assert(m_data_types[k] == kBool);
   assert(GL::GetError() == GL_NO_ERROR);
   assert(m_saved_state[k].empty());
@@ -236,6 +238,8 @@ RetraceRender::StateOverride::save_enabled_state(const StateKey &k, GLint v) {
 
 void
 RetraceRender::StateOverride::save_int_state(const StateKey &k, GLint v) {
+  if (m_data_types[k] == kUnknown)
+    m_data_types[k] = kEnum;
   assert(m_data_types[k] == kEnum);
   assert(GL::GetError() == GL_NO_ERROR);
   assert(m_saved_state[k].empty());

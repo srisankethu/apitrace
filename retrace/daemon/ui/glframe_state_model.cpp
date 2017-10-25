@@ -63,7 +63,8 @@ QStateValue::QStateValue(QObject *parent,
   moveToThread(parent->thread());
   for (auto c : _choices)
     m_choices.append(QVariant(c.c_str()));
-  m_indent = static_cast<int>(std::count(_path.begin(), _path.end(), '/'));
+  m_indent = static_cast<int>(std::count(_path.begin(), _path.end(), '/')) +
+             _name.length() > 0;
   if (_name.length() == 0)
     m_name = _path.substr(_path.find_last_of("/") + 1).c_str();
 }
